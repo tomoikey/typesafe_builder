@@ -1,0 +1,15 @@
+[package]
+name = "typesafe_builder_derive"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "2", features = ["full"] }
+quote = "1"
+darling = "0.20"
+
+[dev-dependencies]
+trybuild = "1.0.105"

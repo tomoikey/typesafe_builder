@@ -1,0 +1,43 @@
+error[E0599]: no method named `build` found for struct `UserBuilder<Filled, Filled, Empty, Empty>` in the current scope
+  --> tests/ui/6.rs:23:10
+   |
+7  |       #[derive(Builder)]
+   |                ------- method `build` not found for this struct
+...
+20 |       let user = UserBuilder::new()
+   |  ________________-
+21 | |         .with_name("Alice".to_string())
+22 | |         .with_age(20)
+23 | |         .build();
+   | |         -^^^^^ method not found in `UserBuilder<Filled, Filled, Empty, Empty>`
+   | |_________|
+   |
+   |
+   = note: the method was found for
+           - `UserBuilder<Empty, Empty, Empty, Empty>`
+           - `UserBuilder<Empty, Empty, Empty, Filled>`
+           - `UserBuilder<Empty, Empty, Filled, Empty>`
+           - `UserBuilder<Empty, Empty, Filled, Filled>`
+           and 9 more types
+
+error[E0599]: no method named `build` found for struct `UserBuilder<Filled, Empty, Filled, Empty>` in the current scope
+  --> tests/ui/6.rs:29:10
+   |
+7  |       #[derive(Builder)]
+   |                ------- method `build` not found for this struct
+...
+26 |       let user = UserBuilder::new()
+   |  ________________-
+27 | |         .with_name("Alice".to_string())
+28 | |         .with_address("123 Main St".to_string())
+29 | |         .build();
+   | |         -^^^^^ method not found in `UserBuilder<Filled, Empty, Filled, Empty>`
+   | |_________|
+   |
+   |
+   = note: the method was found for
+           - `UserBuilder<Empty, Empty, Empty, Empty>`
+           - `UserBuilder<Empty, Empty, Empty, Filled>`
+           - `UserBuilder<Empty, Empty, Filled, Empty>`
+           - `UserBuilder<Empty, Empty, Filled, Filled>`
+           and 9 more types

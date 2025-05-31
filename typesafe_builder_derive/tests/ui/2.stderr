@@ -1,0 +1,18 @@
+error[E0599]: no method named `build` found for struct `UserBuilder<Filled, Empty>` in the current scope
+  --> tests/ui/2.rs:18:10
+   |
+7  |       #[derive(Builder)]
+   |                ------- method `build` not found for this struct
+...
+16 |       let user = UserBuilder::new()
+   |  ________________-
+17 | |         .with_name("Alice".to_string())
+18 | |         .build();
+   | |         -^^^^^ method not found in `UserBuilder<Filled, Empty>`
+   | |_________|
+   |
+   |
+   = note: the method was found for
+           - `UserBuilder<Empty, Empty>`
+           - `UserBuilder<Empty, Filled>`
+           - `UserBuilder<Filled, Filled>`

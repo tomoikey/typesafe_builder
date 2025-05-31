@@ -1,0 +1,13 @@
+[package]
+name = "typesafe_builder"
+version = "0.1.0"
+edition = "2024"
+authors = ["tomoikey"]
+readme = "README.md"
+repository = "https://github.com/tomoikey/typesafe_builder"
+categories = ["accessibility", "development-tools", "rust-patterns"]
+license = "MIT"
+description = "A procedural macro to generate type-safe builder patterns for Rust structs"
+
+[dependencies]
+typesafe_builder_derive = { path = "./typesafe_builder_derive" }
