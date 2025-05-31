@@ -18,7 +18,7 @@ typesafe_builder = "0.1.0"
 ## Usage
 ### Required Field
 ```rust
-use typesafe_builder::Builder;
+use typesafe_builder::*;
 
 #[derive(Builder)]
 struct User {
@@ -31,7 +31,7 @@ let user = UserBuilder::new().with_name("Alice".to_string()).build();
 
 ### Optional Field
 ```rust
-use typesafe_builder::Builder;
+use typesafe_builder::*;
 
 #[derive(Builder)]
 struct User {
@@ -45,7 +45,7 @@ let user2 = UserBuilder::new().with_name("Alice".to_string()).build();
 
 ### Conditionally Required Field (`required_if`)
 ```rust
-use typesafe_builder::Builder;
+use typesafe_builder::*;
 
 #[derive(Builder)]
 struct User {
@@ -54,10 +54,11 @@ struct User {
     #[builder(required_if = "name")]
     age: Option<u8>,
 }
+```
 
-// If name is Some, age is required
-// The following will not compile:
-// let user = UserBuilder::new().with_name("Alice".to_string()).build();
+```rust
+// The following will not compile because age is required if name is Some:
+let user = UserBuilder::new().with_name("Alice".to_string()).build();
 ```
 
 #### Complex Conditional Expressions
@@ -75,8 +76,16 @@ struct User {
     #[builder(required_if = "name && (age || address)")]
     email: Option<String>,
 }
+```
 
-// If both name and age are Some, or both name and address are Some, email is required
+```rust
+// The following will not compile
+
+// because email is required if name and age are Some
+let user1 = UserBuilder::new().with_name("Alice".to_string()).with_age(20).build();
+
+// because email is required if name and address are Some
+let user2 = UserBuilder::new().with_name("Alice".to_string()).with_address("123 Main St".to_string()).build();
 ```
 
 ## License
