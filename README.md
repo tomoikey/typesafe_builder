@@ -1,11 +1,13 @@
-<h2 align="center">Refined Type</h2>
+<h2 align="center">🦀 Type-Safe Builder Pattern for Rustacean 🦀</h2>
 
 <div align="center">
     <div>
         <img src="https://img.shields.io/crates/v/typesafe_builder.svg"/>
         <img src="https://img.shields.io/crates/d/typesafe_builder"/>
     </div>
-    <i>Code More simply, More safely, for all Rustaceans.🦀</i>
+    <i>Code More simply, More safely...</i>
+    <br/>
+    <img width=320 src="https://github.com/user-attachments/assets/b811fc5e-a63f-42a5-a4bd-4fba8f3b75bc">
     <br/>
     <div>
         <a href="https://github.com/tomoikey/typesafe_builder/stargazers">
