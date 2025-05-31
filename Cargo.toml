@@ -10,4 +10,4 @@ license = "MIT"
 description = "A procedural macro to generate type-safe builder patterns for Rust structs"
 
 [dependencies]
-typesafe_builder_derive = { path = "./typesafe_builder_derive" }
+typesafe_builder_derive = "0.1.0"

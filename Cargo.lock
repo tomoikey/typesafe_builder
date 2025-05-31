@@ -94,6 +94,8 @@ dependencies = [
 [[package]]
 name = "typesafe_builder_derive"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a7c285a589e19b01c8144c49cb8f3cdde66eee11fff40a640f68cfec833d23a"
 dependencies = [
  "darling",
  "quote",
