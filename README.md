@@ -1,4 +1,35 @@
-# typesafe_builder
+<h2 align="center">Refined Type</h2>
+
+<div align="center">
+    <div>
+        <img src="https://img.shields.io/crates/v/typesafe_builder.svg"/>
+        <img src="https://img.shields.io/crates/d/typesafe_builder"/>
+    </div>
+    <i>Code More simply, More safely, for all Rustaceans.🦀</i>
+    <br/>
+    <div>
+        <a href="https://github.com/tomoikey/typesafe_builder/stargazers">
+            <img src="https://img.shields.io/github/stars/tomoikey/typesafe_builder" alt="Stars Badge"/>
+        </a>
+        <a href="https://github.com/tomoikey/typesafe_builder/network/members">
+            <img src="https://img.shields.io/github/forks/tomoikey/typesafe_builder" alt="Forks Badge"/>
+        </a>
+    </div>
+    <a href="https://github.com/tomoikey/typesafe_builder/pulls">
+        <img src="https://img.shields.io/github/issues-pr/tomoikey/typesafe_builder" alt="Pull Requests Badge"/>
+    </a>
+    <a href="https://github.com/tomoikey/typesafe_builder/issues">
+        <img src="https://img.shields.io/github/issues/tomoikey/typesafe_builder" alt="Issues Badge"/>
+    </a>
+    <a href="https://github.com/tomoikey/typesafe_builder/graphs/contributors">
+        <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/tomoikey/typesafe_builder?color=2b9348">
+    </a>
+    <a href="https://github.com/tomoikey/typesafe_builder/blob/main/LICENSE">
+        <img src="https://img.shields.io/github/license/tomoikey/typesafe_builder?color=2b9348" alt="License Badge"/>
+    </a>
+</div>
+
+---
 
 A procedural macro for Rust that enables type-safe builder patterns. This crate enforces required, optional, and conditionally required fields at the type level, ensuring safe and flexible struct construction.
 
