@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-use syn::{BinOp, Expr, ExprBinary, ExprPath, ExprUnary, UnOp};
+use syn::{Expr, ExprBinary, ExprPath, ExprUnary};
 
 pub fn validate_condition_fields(expr: &Expr, available_fields: &[String]) -> Result<(), String> {
     match expr {

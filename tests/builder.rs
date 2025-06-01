@@ -10,9 +10,7 @@ struct User {
 
 #[test]
 fn test_builder() {
-    let user = UserBuilder::new()
-        .with_name("Alice".to_string())
-        .build();
+    let user = UserBuilder::new().with_name("Alice".to_string()).build();
 
     assert_eq!(user.name, "Alice");
     assert_eq!(user.age, None);
