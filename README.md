@@ -27,12 +27,6 @@
 *Eliminate bugs at the type level and revolutionize your development experience*
 
 ---
-
-[![docs.rs](https://docs.rs/typesafe_builder/badge.svg)](https://docs.rs/typesafe_builder)
-[![CI](https://github.com/tomoikey/typesafe_builder/workflows/CI/badge.svg)](https://github.com/tomoikey/typesafe_builder/actions)
-[![codecov](https://codecov.io/gh/tomoikey/typesafe_builder/branch/main/graph/badge.svg)](https://codecov.io/gh/tomoikey/typesafe_builder)
-[![unsafe forbidden](https://img.shields.io/badge/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
-
 </div>
 
 ## ✨ Why TypeSafe Builder?
@@ -63,19 +57,15 @@ let user = UserBuilder::new()
 
 ### ⚡ **Performance Characteristics**
 - **Zero Runtime Cost** - All validation completed at compile time
-- **Zero Allocations** - No unnecessary memory allocations
-- **Inline Optimizations** - Optimized machine code generation
 
 ### 🛡️ **Safety Guarantees**
 - **No Panic** - Complete elimination of runtime panics
-- **Memory Safety** - Full compatibility with Rust's ownership system
-- **Thread Safety** - Safe in multi-threaded environments
 
 ## 📦 Quick Start
 
 ```toml
 [dependencies]
-typesafe_builder = "0.1.0"
+typesafe_builder = "*.*.*" # Replace with the actual version
 ```
 
 ```rust
@@ -288,26 +278,6 @@ let config = ConfigBuilder::new()
 // error: no method named `build` found for struct `ConfigBuilder<Filled, Empty>`
 //        method `build` is available on `ConfigBuilder<Filled, Filled>`
 ```
-
-## 🛠️ Developer Experience
-
-### IDE Support
-- **Complete type completion** - IDE accurately suggests available methods
-- **Real-time error detection** - Detects constraint violations before saving
-- **Inline documentation** - Displays constraint conditions in tooltips
-
-### Debug Support
-- **Clear error messages** - Specifically shows what's missing
-- **Type information display** - Check current builder state through types
-- **Progressive construction** - Type checking at intermediate states
-
-## 📊 Performance Comparison
-
-| Implementation | Compile-Time Validation | Runtime Overhead | Memory Usage | Error Detection |
-|----------------|:----------------------:|:----------------:|:------------:|:---------------:|
-| **TypeSafe Builder** | ✅ | **0%** | **0%** | Compile-time |
-| Traditional Builder | ❌ | ~15% | ~20% | Runtime |
-| Manual Construction | ❌ | 0% | 0% | None |
 
 ## 🔍 Real-World Use Cases
 
