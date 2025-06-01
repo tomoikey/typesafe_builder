@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🦀 TypeSafe Builder
+# 🦀 TypeSafe Builder 🦀
 
 <div>
     <img src="https://img.shields.io/crates/v/typesafe_builder.svg" alt="crates.io"/>
@@ -22,7 +22,7 @@
 
 **The Ultimate Builder Pattern Implementation Powered by Rust's Type System**
 
-<img width="600" src="https://github.com/user-attachments/assets/a72e996f-5f18-45ed-ab61-5f56bc04e8cc">
+<img width="550" src="https://github.com/user-attachments/assets/a72e996f-5f18-45ed-ab61-5f56bc04e8cc">
 
 *Eliminate bugs at the type level and revolutionize your development experience*
 
