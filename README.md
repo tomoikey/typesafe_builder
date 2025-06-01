@@ -22,7 +22,7 @@
 
 **The Ultimate Builder Pattern Implementation Powered by Rust's Type System**
 
-<img width="600" src="https://github.com/user-attachments/assets/b811fc5e-a63f-42a5-a4bd-4fba8f3b75bc">
+<img width="600" src="https://github.com/user-attachments/assets/a72e996f-5f18-45ed-ab61-5f56bc04e8cc">
 
 *Eliminate bugs at the type level and revolutionize your development experience*
 
