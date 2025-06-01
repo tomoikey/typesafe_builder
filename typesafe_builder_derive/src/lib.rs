@@ -1,30 +1,14 @@
+mod builder_field;
+
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
     BinOp, Expr, ExprBinary, ExprPath, ExprUnary, Ident, PathArguments, Type, UnOp,
     parse_macro_input,
 };
-
-use darling::{FromDeriveInput, FromField, util::Flag};
-
-#[derive(Debug, FromField)]
-#[darling(attributes(builder))]
-struct BuilderField {
-    ident: Option<Ident>,
-    ty: Type,
-
-    /// #[builder(optional)]
-    #[darling(rename = "optional", default)]
-    optional_flag: Flag,
-
-    /// #[builder(required)]
-    #[darling(rename = "required", default)]
-    required_flag: Flag,
-
-    /// #[builder(required_if"...")]
-    #[darling(rename = "required_if", default)]
-    required_if: Option<String>,
-}
+use darling::FromDeriveInput;
+use std::collections::HashMap;
+use builder_field::{BuilderField, Requirement};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(builder), supports(struct_named))]
@@ -33,29 +17,7 @@ struct BuilderInput {
     data: darling::ast::Data<(), BuilderField>,
 }
 
-enum Requirement {
-    Always,
-    Optional,
-    Conditional(Expr),
-}
-
-impl BuilderField {
-    fn requirement(&self) -> syn::Result<Requirement> {
-        if let Some(req_if) = &self.required_if {
-            let expr_result: Result<Expr, _> = syn::parse_str(&req_if);
-            let expr: Expr = expr_result?;
-            Ok(Requirement::Conditional(expr))
-        } else if self.required_flag.is_present() {
-            Ok(Requirement::Always)
-        } else if self.optional_flag.is_present() {
-            Ok(Requirement::Optional)
-        } else {
-            Err(syn::Error::new(self.ident.as_ref().unwrap().span(), "missing required field"))
-        }
-    }
-}
-
-fn eval_expr(expr: &Expr, vars: &std::collections::HashMap<String, bool>) -> bool {
+fn eval_expr(expr: &Expr, vars: &HashMap<String, bool>) -> bool {
     match expr {
         Expr::Path(ExprPath { path, .. }) => {
             let key = path.segments.last().unwrap().ident.to_string();
@@ -108,14 +70,15 @@ pub fn derive_builder(tokens: TokenStream) -> TokenStream {
         .fields
     {
         let ident = field
-            .ident
-            .clone()
+            .ident()
+            .cloned()
             .expect("darling guarantees named fields");
+
         let req = match field.requirement() {
             Ok(r) => r,
             Err(err) => return err.into_compile_error().into(),
         };
-        field_infos.push((ident, field.ty.clone(), req));
+        field_infos.push((ident, field.ty().clone(), req));
     }
 
     let n_fields = field_infos.len();
