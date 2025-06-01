@@ -1,0 +1,7 @@
+error: Invalid requirement: Multiple builder attributes specified. Only one of required, optional, required_if, optional_if is allowed
+ --> tests/ui/9.rs:7:14
+  |
+7 |     #[derive(Builder)]
+  |              ^^^^^^^
+  |
+  = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

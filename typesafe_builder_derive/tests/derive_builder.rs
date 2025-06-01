@@ -53,3 +53,75 @@ fn required_if_success() {
     assert_eq!(p2.email, Some("a@b.com".to_string()));
     assert_eq!(p2.address, Some("tokyo".to_string()));
 }
+
+#[test]
+fn optional_if_success() {
+    #[derive(Builder, PartialEq)]
+    struct Config {
+        #[builder(optional)]
+        enable_feature: Option<bool>,
+        #[builder(optional_if = "enable_feature")]
+        feature_config: Option<String>,
+    }
+
+    let config1 = ConfigBuilder::new().with_enable_feature(true).build();
+    assert_eq!(config1.enable_feature, Some(true));
+    assert_eq!(config1.feature_config, None);
+
+    let config2 = ConfigBuilder::new()
+        .with_enable_feature(true)
+        .with_feature_config("custom".to_string())
+        .build();
+    assert_eq!(config2.enable_feature, Some(true));
+    assert_eq!(config2.feature_config, Some("custom".to_string()));
+
+    let config3 = ConfigBuilder::new()
+        .with_enable_feature(false)
+        .with_feature_config("required".to_string())
+        .build();
+    assert_eq!(config3.enable_feature, Some(false));
+    assert_eq!(config3.feature_config, Some("required".to_string()));
+}
+
+#[test]
+fn conditional_behavior_verification() {
+    #[derive(Builder, PartialEq)]
+    struct Config {
+        #[builder(optional)]
+        feature_enabled: Option<bool>,
+        #[builder(required_if = "feature_enabled")]
+        feature_config: Option<String>,
+    }
+
+    let config1 = ConfigBuilder::new().build();
+    assert_eq!(config1.feature_enabled, None);
+    assert_eq!(config1.feature_config, None);
+
+    let config2 = ConfigBuilder::new()
+        .with_feature_enabled(true)
+        .with_feature_config("advanced".to_string())
+        .build();
+    assert_eq!(config2.feature_enabled, Some(true));
+    assert_eq!(config2.feature_config, Some("advanced".to_string()));
+}
+
+#[test]
+fn optional_if_behavior_verification() {
+    #[derive(Builder, PartialEq)]
+    struct AppConfig {
+        #[builder(optional)]
+        debug: Option<bool>,
+        #[builder(optional_if = "debug")]
+        debug_file: Option<String>,
+    }
+
+    let config1 = AppConfigBuilder::new()
+        .with_debug_file("debug.log".to_string())
+        .build();
+    assert_eq!(config1.debug, None);
+    assert_eq!(config1.debug_file, Some("debug.log".to_string()));
+
+    let config2 = AppConfigBuilder::new().with_debug(true).build();
+    assert_eq!(config2.debug, Some(true));
+    assert_eq!(config2.debug_file, None);
+}

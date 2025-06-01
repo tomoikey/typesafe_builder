@@ -1,0 +1,7 @@
+error: Field 'nonexistent_field' used in condition does not exist
+ --> tests/ui/7.rs:4:14
+  |
+4 |     #[derive(Builder)]
+  |              ^^^^^^^
+  |
+  = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

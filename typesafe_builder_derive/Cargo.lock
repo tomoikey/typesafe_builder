@@ -247,6 +247,7 @@ name = "typesafe_builder_derive"
 version = "0.1.0"
 dependencies = [
  "darling",
+ "proc-macro2",
  "quote",
  "syn",
  "trybuild",
