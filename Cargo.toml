@@ -1,6 +1,6 @@
 [package]
 name = "typesafe_builder"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2024"
 authors = ["tomoikey"]
 readme = "README.md"
@@ -10,4 +10,4 @@ license = "MIT"
 description = "A procedural macro to generate type-safe builder patterns for Rust structs"
 
 [dependencies]
-typesafe_builder_derive = "1.1.0"
+typesafe_builder_derive = "1.2.0"

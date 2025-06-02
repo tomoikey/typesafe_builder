@@ -86,16 +86,16 @@ dependencies = [
 
 [[package]]
 name = "typesafe_builder"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "typesafe_builder_derive",
 ]
 
 [[package]]
 name = "typesafe_builder_derive"
-version = "1.1.0"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "babcfd3522cbad2286e3aa337eab3affd924d0209c2a2d2f96a1187e90a68e56"
+checksum = "ed9482084e487b7a1116b80d5e12fc366e110e674c8c675290f871f321efcd2a"
 dependencies = [
  "darling",
  "proc-macro2",
