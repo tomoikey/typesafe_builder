@@ -24,7 +24,7 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - name: Run tests (root)
-      run: cargo test --verbose
+      run: cargo test --verbose --config 'patch.crates-io.typesafe_builder_derive.path="./typesafe_builder_derive"'
 
     - name: Run tests (typesafe_builder_derive)
       run: |
