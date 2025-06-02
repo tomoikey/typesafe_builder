@@ -1,7 +1,7 @@
 use typesafe_builder_derive::Builder;
 
-struct Empty;
-struct Filled;
+struct _TypesafeBuilderEmpty;
+struct _TypesafeBuilderFilled;
 
 fn main() {
     #[derive(Builder)]

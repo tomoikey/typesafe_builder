@@ -15,33 +15,83 @@ use validate_condition::validate_condition_fields;
 pub fn derive_builder_impl(input: Input) -> Result<TokenStream2, darling::Error> {
     let name = input.ident();
     let builder_name = Ident::new(&format!("{}Builder", name), name.span());
+    let generics = input.generics();
 
     let field_infos = extract_field_infos(&input)?;
     let n_fields = field_infos.len();
     let type_params = generate_type_params(n_fields, name.span());
-    let default_generics: Vec<_> = (0..n_fields).map(|_| quote! { Empty }).collect();
+    let default_generics = (0..n_fields)
+        .map(|_| quote! { _TypesafeBuilderEmpty })
+        .collect::<Vec<_>>();
+
+    let (_, _, where_clause) = generics.split_for_impl();
+    let generic_params = &generics.params;
 
     let builder_fields = generate_builder_fields(&field_infos, &type_params);
     let builder_initialization = generate_builder_initialization(&field_infos);
-    let setter_methods =
-        generate_setter_methods(&field_infos, &type_params, &builder_name, name.span());
-    let build_impls = generate_build_methods(&field_infos, &builder_name, name);
+    let setter_methods = generate_setter_methods(
+        &field_infos,
+        &type_params,
+        &builder_name,
+        generics,
+        name.span(),
+    );
+    let build_impls = generate_build_methods(&field_infos, &builder_name, name, generics);
+
+    let builder_struct = if generic_params.is_empty() {
+        quote! {
+            pub struct #builder_name < #( #type_params ),* > {
+                #( #builder_fields )*
+            }
+        }
+    } else {
+        quote! {
+            pub struct #builder_name < #generic_params, #( #type_params ),* > {
+                #( #builder_fields )*
+            }
+        }
+    };
+
+    let new_impl = if generic_params.is_empty() {
+        quote! {
+            impl #builder_name < #( #default_generics ),* > {
+                #[inline]
+                pub fn new() -> Self {
+                    Self { #( #builder_initialization )* }
+                 }
+            }
+        }
+    } else {
+        quote! {
+            impl < #generic_params > #builder_name < #generic_params, #( #default_generics ),* > #where_clause {
+                #[inline]
+                pub fn new() -> Self {
+                    Self { #( #builder_initialization )* }
+                 }
+            }
+        }
+    };
+
+    let setter_impl = if generic_params.is_empty() {
+        quote! {
+            impl < #( #type_params ),* > #builder_name < #( #type_params ),* > {
+                #( #setter_methods )*
+            }
+        }
+    } else {
+        quote! {
+            impl < #generic_params, #( #type_params ),* > #builder_name < #generic_params, #( #type_params ),* > #where_clause {
+                #( #setter_methods )*
+            }
+        }
+    };
 
     Ok(quote! {
-        pub struct #builder_name < #( #type_params ),* > {
-            #( #builder_fields )*
-        }
+        #builder_struct
 
-        impl #builder_name < #( #default_generics ),* > {
-            #[inline]
-            pub fn new() -> Self {
-                Self { #( #builder_initialization )* }
-             }
-        }
+        #new_impl
 
-        impl < #( #type_params ),* > #builder_name < #( #type_params ),* > {
-            #( #setter_methods )*
-        }
+        #setter_impl
 
         #( #build_impls )*
     })
@@ -102,20 +152,18 @@ fn extract_field_infos(
             Requirement::Always => false,
         };
 
-        if requirement_is_option_based {
-            if !is_type_option(&field.ty()) {
-                let requirement_name = match &req {
-                    Requirement::Optional => "optional",
-                    Requirement::Conditional(_) => "required_if",
-                    Requirement::OptionalIf(_) => "optional_if",
-                    _ => unreachable!(),
-                };
-                return Err(darling::Error::custom(format!(
-                    "Field `{}` marked with `#[builder({})]` must be of type `Option<T>`",
-                    ident, requirement_name
-                ))
-                .with_span(&field.ty()));
-            }
+        if requirement_is_option_based && !is_type_option(field.ty()) {
+            let requirement_name = match &req {
+                Requirement::Optional => "optional",
+                Requirement::Conditional(_) => "required_if",
+                Requirement::OptionalIf(_) => "optional_if",
+                _ => unreachable!(),
+            };
+            return Err(darling::Error::custom(format!(
+                "Field `{}` marked with `#[builder({})]` must be of type `Option<T>`",
+                ident, requirement_name
+            ))
+            .with_span(&field.ty()));
         }
 
         field_infos.push((ident, field.ty().clone(), req));
@@ -126,7 +174,7 @@ fn extract_field_infos(
 
 fn generate_type_params(n_fields: usize, span: proc_macro2::Span) -> Vec<Ident> {
     (0..n_fields)
-        .map(|i| Ident::new(&format!("T{}", i), span))
+        .map(|i| Ident::new(&format!("_TypesafeBuilder{}", i), span))
         .collect()
 }
 

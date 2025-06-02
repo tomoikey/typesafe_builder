@@ -1,4 +1,4 @@
-error[E0599]: no method named `build` found for struct `UserBuilder<Filled, Filled, Empty>` in the current scope
+error[E0599]: no method named `build` found for struct `UserBuilder<_TypesafeBuilderFilled, _TypesafeBuilderFilled, _TypesafeBuilderEmpty>` in the current scope
   --> tests/ui/4.rs:21:10
    |
 7  |       #[derive(Builder)]
@@ -9,13 +9,13 @@ error[E0599]: no method named `build` found for struct `UserBuilder<Filled, Fill
 19 | |         .with_name("Alice".to_string())
 20 | |         .with_age(20)
 21 | |         .build();
-   | |         -^^^^^ method not found in `UserBuilder<Filled, Filled, Empty>`
+   | |         -^^^^^ method not found in `UserBuilder<_TypesafeBuilderFilled, _TypesafeBuilderFilled, _TypesafeBuilderEmpty>`
    | |_________|
    |
    |
    = note: the method was found for
-           - `UserBuilder<Empty, Empty, Empty>`
-           - `UserBuilder<Empty, Empty, Filled>`
-           - `UserBuilder<Empty, Filled, Empty>`
-           - `UserBuilder<Empty, Filled, Filled>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderEmpty>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderFilled>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderFilled, _TypesafeBuilderEmpty>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderFilled, _TypesafeBuilderFilled>`
            and 3 more types

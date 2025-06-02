@@ -1,16 +1,21 @@
 use darling::{FromDeriveInput, FromField, util::Flag};
-use syn::{Expr, Ident, Type};
+use syn::{Expr, Generics, Ident, Type};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(builder), supports(struct_named))]
 pub struct Input {
     ident: Ident,
+    generics: Generics,
     data: darling::ast::Data<(), InputField>,
 }
 
 impl Input {
     pub fn ident(&self) -> &Ident {
         &self.ident
+    }
+
+    pub fn generics(&self) -> &Generics {
+        &self.generics
     }
 
     pub fn data(&self) -> darling::ast::Data<&(), &InputField> {
@@ -64,11 +69,11 @@ impl InputField {
         }
 
         if let Some(opt_if) = &self.optional_if {
-            let expr_result: Result<Expr, _> = syn::parse_str(&opt_if);
+            let expr_result: Result<Expr, _> = syn::parse_str(opt_if);
             let expr: Expr = expr_result?;
             Ok(Requirement::OptionalIf(expr))
         } else if let Some(req_if) = &self.required_if {
-            let expr_result: Result<Expr, _> = syn::parse_str(&req_if);
+            let expr_result: Result<Expr, _> = syn::parse_str(req_if);
             let expr: Expr = expr_result?;
             Ok(Requirement::Conditional(expr))
         } else if self.required_flag.is_present() {
