@@ -1,8 +1,8 @@
 use typesafe_builder_derive::Builder;
 
-struct Empty;
+struct _TypesafeBuilderEmpty;
 
-struct Filled;
+struct _TypesafeBuilderFilled;
 
 #[test]
 fn required_field_success() {
@@ -124,4 +124,70 @@ fn optional_if_behavior_verification() {
     let config2 = AppConfigBuilder::new().with_debug(true).build();
     assert_eq!(config2.debug, Some(true));
     assert_eq!(config2.debug_file, None);
+}
+
+#[test]
+fn lifetime_struct_success() {
+    #[derive(Builder, PartialEq)]
+    struct Config<'a> {
+        #[builder(required)]
+        name: &'a str,
+    }
+
+    let config = ConfigBuilder::new().with_name("Alice").build();
+    assert_eq!(config.name, "Alice");
+}
+
+#[test]
+fn generic_struct_success() {
+    #[derive(Builder, PartialEq)]
+    struct Container<T> {
+        #[builder(required)]
+        value: T,
+    }
+
+    let container = ContainerBuilder::new().with_value(42i32).build();
+    assert_eq!(container.value, 42);
+}
+
+#[test]
+fn lifetime_and_generic_struct_success() {
+    #[derive(Builder, PartialEq)]
+    struct ComplexConfig<'a, T> {
+        #[builder(required)]
+        name: &'a str,
+        #[builder(optional)]
+        value: Option<T>,
+    }
+
+    let config1: ComplexConfig<'_, i32> = ComplexConfigBuilder::new().with_name("test").build();
+    assert_eq!(config1.name, "test");
+    assert_eq!(config1.value, None);
+
+    let config2 = ComplexConfigBuilder::new()
+        .with_name("test")
+        .with_value(100i32)
+        .build();
+    assert_eq!(config2.name, "test");
+    assert_eq!(config2.value, Some(100));
+}
+
+#[test]
+fn generic_struct_where_clause_success() {
+    #[derive(Builder)]
+    struct Container<T>
+    where
+        T: Clone,
+    {
+        #[builder(required)]
+        value: T,
+    }
+
+    let container = ContainerBuilder::new().with_value(42i32).build();
+    assert_eq!(container.value, 42);
+
+    let container = ContainerBuilder::new()
+        .with_value("hello".to_string())
+        .build();
+    assert_eq!(container.value, "hello");
 }

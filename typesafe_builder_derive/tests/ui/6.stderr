@@ -1,4 +1,4 @@
-error[E0599]: no method named `build` found for struct `UserBuilder<Filled, Filled, Empty, Empty>` in the current scope
+error[E0599]: no method named `build` found for struct `UserBuilder<_TypesafeBuilderFilled, _TypesafeBuilderFilled, _TypesafeBuilderEmpty, _TypesafeBuilderEmpty>` in the current scope
   --> tests/ui/6.rs:23:10
    |
 7  |       #[derive(Builder)]
@@ -9,18 +9,18 @@ error[E0599]: no method named `build` found for struct `UserBuilder<Filled, Fill
 21 | |         .with_name("Alice".to_string())
 22 | |         .with_age(20)
 23 | |         .build();
-   | |         -^^^^^ method not found in `UserBuilder<Filled, Filled, Empty, Empty>`
+   | |         -^^^^^ method not found in `UserBuilder<_TypesafeBuilderFilled, _TypesafeBuilderFilled, _TypesafeBuilderEmpty, _TypesafeBuilderEmpty>`
    | |_________|
    |
    |
    = note: the method was found for
-           - `UserBuilder<Empty, Empty, Empty, Empty>`
-           - `UserBuilder<Empty, Empty, Empty, Filled>`
-           - `UserBuilder<Empty, Empty, Filled, Empty>`
-           - `UserBuilder<Empty, Empty, Filled, Filled>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderEmpty>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderFilled>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderFilled, _TypesafeBuilderEmpty>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderFilled, _TypesafeBuilderFilled>`
            and 9 more types
 
-error[E0599]: no method named `build` found for struct `UserBuilder<Filled, Empty, Filled, Empty>` in the current scope
+error[E0599]: no method named `build` found for struct `UserBuilder<_TypesafeBuilderFilled, _TypesafeBuilderEmpty, _TypesafeBuilderFilled, _TypesafeBuilderEmpty>` in the current scope
   --> tests/ui/6.rs:29:10
    |
 7  |       #[derive(Builder)]
@@ -31,13 +31,13 @@ error[E0599]: no method named `build` found for struct `UserBuilder<Filled, Empt
 27 | |         .with_name("Alice".to_string())
 28 | |         .with_address("123 Main St".to_string())
 29 | |         .build();
-   | |         -^^^^^ method not found in `UserBuilder<Filled, Empty, Filled, Empty>`
+   | |         -^^^^^ method not found in `UserBuilder<_TypesafeBuilderFilled, _TypesafeBuilderEmpty, _TypesafeBuilderFilled, _TypesafeBuilderEmpty>`
    | |_________|
    |
    |
    = note: the method was found for
-           - `UserBuilder<Empty, Empty, Empty, Empty>`
-           - `UserBuilder<Empty, Empty, Empty, Filled>`
-           - `UserBuilder<Empty, Empty, Filled, Empty>`
-           - `UserBuilder<Empty, Empty, Filled, Filled>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderEmpty>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderFilled>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderFilled, _TypesafeBuilderEmpty>`
+           - `UserBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty, _TypesafeBuilderFilled, _TypesafeBuilderFilled>`
            and 9 more types

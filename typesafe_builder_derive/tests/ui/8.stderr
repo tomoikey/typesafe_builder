@@ -1,13 +1,13 @@
-error[E0599]: no method named `build` found for struct `ConfigBuilder<Empty, Empty>` in the current scope
+error[E0599]: no method named `build` found for struct `ConfigBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty>` in the current scope
   --> tests/ui/8.rs:16:39
    |
 7  |     #[derive(Builder)]
    |              ------- method `build` not found for this struct
 ...
 16 |     let config = ConfigBuilder::new().build();
-   |                                       ^^^^^ method not found in `ConfigBuilder<Empty, Empty>`
+   |                                       ^^^^^ method not found in `ConfigBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderEmpty>`
    |
    = note: the method was found for
-           - `ConfigBuilder<Empty, Filled>`
-           - `ConfigBuilder<Filled, Empty>`
-           - `ConfigBuilder<Filled, Filled>`
+           - `ConfigBuilder<_TypesafeBuilderEmpty, _TypesafeBuilderFilled>`
+           - `ConfigBuilder<_TypesafeBuilderFilled, _TypesafeBuilderEmpty>`
+           - `ConfigBuilder<_TypesafeBuilderFilled, _TypesafeBuilderFilled>`

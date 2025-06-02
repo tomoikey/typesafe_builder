@@ -1,16 +1,21 @@
 use darling::{FromDeriveInput, FromField, util::Flag};
-use syn::{Expr, Ident, Type};
+use syn::{Expr, Generics, Ident, Type};
 
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(builder), supports(struct_named))]
 pub struct Input {
     ident: Ident,
+    generics: Generics,
     data: darling::ast::Data<(), InputField>,
 }
 
 impl Input {
     pub fn ident(&self) -> &Ident {
         &self.ident
+    }
+
+    pub fn generics(&self) -> &Generics {
+        &self.generics
     }
 
     pub fn data(&self) -> darling::ast::Data<&(), &InputField> {

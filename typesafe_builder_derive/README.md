@@ -217,30 +217,6 @@ let db = DatabaseBuilder::new()
     .build();
 ```
 
-## 🎯 Type Safety Mechanism
-
-TypeSafe Builder tracks the state of each field using type parameters:
-
-```rust
-// Internally generates types like this
-pub struct UserBuilder<T0, T1> {
-    name: Option<String>,      // T0 tracks state
-    age: Option<u32>,          // T1 tracks state
-    _phantom: PhantomData<(T0, T1)>,
-}
-
-// State markers
-pub struct Empty;   // Unset state
-pub struct Filled;  // Set state
-
-// build() method is only available when necessary constraints are met
-impl UserBuilder<Filled, T1> {  // name is required so Filled is needed
-    pub fn build(self) -> User { /* ... */ }
-}
-```
-
-This mechanism allows the compiler to **statically** check all constraints, completely preventing runtime errors.
-
 ## 🔧 Error Handling
 
 ### Compile-Time Error Examples
@@ -255,8 +231,8 @@ struct User {
 // ❌ Compile error
 let user = UserBuilder::new().build();
 //                           ^^^^^ 
-// error: no method named `build` found for struct `UserBuilder<Empty>`
-//        method `build` is available on `UserBuilder<Filled>`
+// error: no method named `build` found for struct `UserBuilder<_TypesafeBuilderEmpty>`
+//        method `build` is available on `UserBuilder<_TypesafeBuilderFilled>`
 ```
 
 ### Constraint Violation Error Examples
@@ -275,8 +251,8 @@ let config = ConfigBuilder::new()
     .with_feature(true)
     .build();
 //   ^^^^^ 
-// error: no method named `build` found for struct `ConfigBuilder<Filled, Empty>`
-//        method `build` is available on `ConfigBuilder<Filled, Filled>`
+// error: no method named `build` found for struct `ConfigBuilder<_TypesafeBuilderFilled, _TypesafeBuilderEmpty>`
+//        method `build` is available on `ConfigBuilder<_TypesafeBuilderFilled, _TypesafeBuilderFilled>`
 ```
 
 ## 🔍 Real-World Use Cases

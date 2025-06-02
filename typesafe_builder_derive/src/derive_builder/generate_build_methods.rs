@@ -2,28 +2,33 @@ use super::eval_condition;
 use crate::input::Requirement;
 use quote::quote;
 use std::collections::HashMap;
-use syn::{Ident, Type};
+use syn::{Generics, Ident, Type};
 
 pub fn generate_build_methods(
     field_infos: &[(Ident, Type, Requirement)],
     builder_name: &Ident,
     struct_name: &Ident,
+    generics: &Generics,
 ) -> Vec<proc_macro2::TokenStream> {
     let n_fields = field_infos.len();
     let mut build_impls = Vec::new();
+    let (_, ty_generics, where_clause) = generics.split_for_impl();
+    let generic_params = &generics.params;
 
     for mask in 0..(1_u32 << n_fields) {
         if !is_mask_valid(mask, field_infos) {
             continue;
         }
 
-        let generics = (0..n_fields).map(|i| {
-            if (mask & (1 << i)) != 0 {
-                quote! { Filled }
-            } else {
-                quote! { Empty }
-            }
-        });
+        let builder_generics: Vec<_> = (0..n_fields)
+            .map(|i| {
+                if (mask & (1 << i)) != 0 {
+                    quote! { _TypesafeBuilderFilled }
+                } else {
+                    quote! { _TypesafeBuilderEmpty }
+                }
+            })
+            .collect();
 
         let build_fields = field_infos.iter().map(|(ident, _ty, req)| match req {
             Requirement::Always => {
@@ -38,15 +43,29 @@ pub fn generate_build_methods(
             }
         });
 
-        build_impls.push(quote! {
-            impl #builder_name < #( #generics ),* > {
-                pub fn build(self) -> #struct_name {
-                    #struct_name {
-                        #( #build_fields, )*
+        let impl_block = if generic_params.is_empty() {
+            quote! {
+                impl #builder_name < #( #builder_generics ),* > {
+                    pub fn build(self) -> #struct_name {
+                        #struct_name {
+                            #( #build_fields, )*
+                        }
                     }
                 }
             }
-        });
+        } else {
+            quote! {
+                impl < #generic_params > #builder_name < #generic_params, #( #builder_generics ),* > #where_clause {
+                    pub fn build(self) -> #struct_name #ty_generics {
+                        #struct_name {
+                            #( #build_fields, )*
+                        }
+                    }
+                }
+            }
+        };
+
+        build_impls.push(impl_block);
     }
 
     build_impls
