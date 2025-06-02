@@ -6,7 +6,7 @@
     <img src="https://img.shields.io/crates/v/typesafe_builder.svg" alt="crates.io"/>
     <img src="https://img.shields.io/crates/d/typesafe_builder" alt="downloads"/>
     <img src="https://img.shields.io/github/license/tomoikey/typesafe_builder" alt="license"/>
-    <img src="https://img.shields.io/badge/rustc-1.80+-blue" alt="rustc"/>
+    <img src="https://img.shields.io/badge/rustc-1.87+-blue" alt="rustc"/>
 </div>
 
 <div>
