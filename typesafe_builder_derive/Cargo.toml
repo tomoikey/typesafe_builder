@@ -13,7 +13,7 @@ description = "A procedural macro to generate type-safe builder patterns for Rus
 proc-macro = true
 
 [dependencies]
-syn = { version = "2", features = ["full"] }
+syn = { version = "2", features = ["derive", "parsing", "proc-macro"] }
 quote = "1"
 darling = "0.20"
 proc-macro2 = "1"
