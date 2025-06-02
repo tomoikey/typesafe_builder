@@ -365,6 +365,15 @@ Amazing developers who have contributed to this project:
       </a>
     </td>
     <td align="center">
+      <a href="https://github.com/ramsyana">
+        <img src="https://github.com/ramsyana.png?size=100" width="100px;" alt="ramsyana"/>
+        <br />
+        <sub><b>ramsyana</b></sub>
+        <br />
+        <sub>🔧 Contributor</sub>
+      </a>
+    </td>
+    <td align="center">
       <a href="https://github.com/tomoikey/typesafe_builder/graphs/contributors">
         <img src="https://via.placeholder.com/100x100/f0f0f0/999999?text=%3F" width="100px;" alt="You?"/>
         <br />
