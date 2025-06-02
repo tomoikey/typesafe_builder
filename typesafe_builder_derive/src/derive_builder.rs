@@ -95,6 +95,27 @@ fn extract_field_infos(
             }
         }
 
+        let requirement_is_option_based = match &req {
+            Requirement::Optional | Requirement::Conditional(_) | Requirement::OptionalIf(_) => true,
+            Requirement::Always => false,
+        };
+
+        if requirement_is_option_based {
+            if !is_type_option(&field.ty()) {
+                let requirement_name = match &req {
+                    Requirement::Optional => "optional",
+                    Requirement::Conditional(_) => "required_if",
+                    Requirement::OptionalIf(_) => "optional_if",
+                    _ => unreachable!(),
+                };
+                return Err(darling::Error::custom(format!(
+                    "Field `{}` marked with `#[builder({})]` must be of type `Option<T>`",
+                    ident, requirement_name
+                ))
+                .with_span(&field.ty()));
+            }
+        }
+
         field_infos.push((ident, field.ty().clone(), req));
     }
 
@@ -145,6 +166,19 @@ fn generate_builder_initialization<'a>(
             #phantom : std::marker::PhantomData,
         }
     })
+}
+
+fn is_type_option(field_ty: &Type) -> bool {
+    if let Type::Path(type_path) = field_ty {
+        if let Some(last_segment) = type_path.path.segments.last() {
+            if last_segment.ident == "Option" {
+                if let PathArguments::AngleBracketed(params) = &last_segment.arguments {
+                    return !params.args.is_empty(); // Option<T> has one arg
+                }
+            }
+        }
+    }
+    false
 }
 
 fn extract_arg_type(field_ty: &Type, req: &Requirement) -> proc_macro2::TokenStream {
