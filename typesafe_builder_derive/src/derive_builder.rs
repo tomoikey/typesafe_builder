@@ -20,7 +20,9 @@ pub fn derive_builder_impl(input: Input) -> Result<TokenStream2, darling::Error>
     let field_infos = extract_field_infos(&input)?;
     let n_fields = field_infos.len();
     let type_params = generate_type_params(n_fields, name.span());
-    let default_generics: Vec<_> = (0..n_fields).map(|_| quote! { _TypesafeBuilderEmpty }).collect();
+    let default_generics = (0..n_fields)
+        .map(|_| quote! { _TypesafeBuilderEmpty })
+        .collect::<Vec<_>>();
 
     let (_, _, where_clause) = generics.split_for_impl();
     let generic_params = &generics.params;

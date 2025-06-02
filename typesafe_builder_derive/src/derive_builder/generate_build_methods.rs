@@ -20,7 +20,7 @@ pub fn generate_build_methods(
             continue;
         }
 
-        let builder_generics: Vec<_> = (0..n_fields)
+        let builder_generics = (0..n_fields)
             .map(|i| {
                 if (mask & (1 << i)) != 0 {
                     quote! { _TypesafeBuilderFilled }
@@ -28,7 +28,7 @@ pub fn generate_build_methods(
                     quote! { _TypesafeBuilderEmpty }
                 }
             })
-            .collect();
+            .collect::<Vec<_>>();
 
         let build_fields = field_infos.iter().map(|(ident, _ty, req)| match req {
             Requirement::Always => {
