@@ -96,7 +96,9 @@ fn extract_field_infos(
         }
 
         let requirement_is_option_based = match &req {
-            Requirement::Optional | Requirement::Conditional(_) | Requirement::OptionalIf(_) => true,
+            Requirement::Optional | Requirement::Conditional(_) | Requirement::OptionalIf(_) => {
+                true
+            }
             Requirement::Always => false,
         };
 
