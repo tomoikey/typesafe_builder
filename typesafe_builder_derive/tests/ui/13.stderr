@@ -1,0 +1,5 @@
+error: Field `name` marked with `#[builder(optional_if)]` must be of type `Option<T>`
+  --> tests/ui/13.rs:13:15
+   |
+13 |         name: String, // Error: not Option<String>
+   |               ^^^^^^
