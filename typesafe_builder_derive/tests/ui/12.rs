@@ -9,7 +9,7 @@ fn main() {
         #[builder(required)]
         id: u32,
         
-        #[builder(required_if = "id > 10")]
+        #[builder(required_if = "id")]
         name: String, // Error: not Option<String>
     }
 }
