@@ -69,11 +69,11 @@ impl InputField {
         }
 
         if let Some(opt_if) = &self.optional_if {
-            let expr_result: Result<Expr, _> = syn::parse_str(&opt_if);
+            let expr_result: Result<Expr, _> = syn::parse_str(opt_if);
             let expr: Expr = expr_result?;
             Ok(Requirement::OptionalIf(expr))
         } else if let Some(req_if) = &self.required_if {
-            let expr_result: Result<Expr, _> = syn::parse_str(&req_if);
+            let expr_result: Result<Expr, _> = syn::parse_str(req_if);
             let expr: Expr = expr_result?;
             Ok(Requirement::Conditional(expr))
         } else if self.required_flag.is_present() {

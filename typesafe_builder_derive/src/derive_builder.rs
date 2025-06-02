@@ -33,10 +33,10 @@ pub fn derive_builder_impl(input: Input) -> Result<TokenStream2, darling::Error>
         &field_infos,
         &type_params,
         &builder_name,
-        &generics,
+        generics,
         name.span(),
     );
-    let build_impls = generate_build_methods(&field_infos, &builder_name, name, &generics);
+    let build_impls = generate_build_methods(&field_infos, &builder_name, name, generics);
 
     let builder_struct = if generic_params.is_empty() {
         quote! {
@@ -152,20 +152,18 @@ fn extract_field_infos(
             Requirement::Always => false,
         };
 
-        if requirement_is_option_based {
-            if !is_type_option(&field.ty()) {
-                let requirement_name = match &req {
-                    Requirement::Optional => "optional",
-                    Requirement::Conditional(_) => "required_if",
-                    Requirement::OptionalIf(_) => "optional_if",
-                    _ => unreachable!(),
-                };
-                return Err(darling::Error::custom(format!(
-                    "Field `{}` marked with `#[builder({})]` must be of type `Option<T>`",
-                    ident, requirement_name
-                ))
-                .with_span(&field.ty()));
-            }
+        if requirement_is_option_based && !is_type_option(field.ty()) {
+            let requirement_name = match &req {
+                Requirement::Optional => "optional",
+                Requirement::Conditional(_) => "required_if",
+                Requirement::OptionalIf(_) => "optional_if",
+                _ => unreachable!(),
+            };
+            return Err(darling::Error::custom(format!(
+                "Field `{}` marked with `#[builder({})]` must be of type `Option<T>`",
+                ident, requirement_name
+            ))
+            .with_span(&field.ty()));
         }
 
         field_infos.push((ident, field.ty().clone(), req));
