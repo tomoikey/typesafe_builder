@@ -10,13 +10,33 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@v2
+
+    - name: Run tests (root)
       run: cargo test --verbose
+
+    - name: Run tests (typesafe_builder_derive)
+      run: |
+        cd typesafe_builder_derive
+        cargo test --verbose
+
+    - name: Check formatting (typesafe_builder_derive)
+      run: |
+        cd typesafe_builder_derive
+        cargo fmt --all -- --check
+
+    - name: Run clippy (typesafe_builder_derive)
+      run: |
+        cd typesafe_builder_derive
+        cargo clippy -- -D warnings
