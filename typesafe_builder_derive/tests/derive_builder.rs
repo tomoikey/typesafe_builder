@@ -195,7 +195,7 @@ fn generic_struct_where_clause_success() {
 #[test]
 fn custom_builder_name_success() {
     #[derive(Builder, PartialEq)]
-    #[builder(builder_name = "MyCustomBuilder")]
+    #[builder(name = "MyCustomBuilder")]
     struct User {
         #[builder(required)]
         name: String,

@@ -7,7 +7,7 @@ pub struct Input {
     ident: Ident,
     generics: Generics,
     data: darling::ast::Data<(), InputField>,
-    #[darling(default)]
+    #[darling(rename = "name")]
     builder_name: Option<String>,
 }
 
