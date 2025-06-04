@@ -1,6 +1,6 @@
 [package]
 name = "typesafe_builder_derive"
-version = "1.2.0"
+version = "1.3.0"
 edition = "2024"
 authors = ["tomoikey"]
 readme = "README.md"
@@ -13,10 +13,10 @@ description = "A procedural macro to generate type-safe builder patterns for Rus
 proc-macro = true
 
 [dependencies]
-syn = { version = "2", features = ["derive", "parsing", "proc-macro"] }
-quote = "1"
-darling = "0.20"
-proc-macro2 = "1"
+darling = "0.20.11"
+proc-macro2 = "1.0.95"
+syn = { version = "2.0.101", features = ["derive", "parsing", "proc-macro"] }
+quote = "1.0.40"
 
 [dev-dependencies]
 trybuild = "1.0.105"

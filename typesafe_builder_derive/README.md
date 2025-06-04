@@ -217,6 +217,24 @@ let db = DatabaseBuilder::new()
     .build();
 ```
 
+### 5️⃣ **Custom Builder Name**
+
+```rust
+use typesafe_builder::*;
+
+#[derive(Builder)]
+#[builder(name = "MyCustomBuilder")]  // Customize the builder name
+struct User {
+    #[builder(required)]
+    name: String,
+}
+
+// Use the customized builder name
+let user = MyCustomBuilder::new()
+    .with_name("Alice".to_string())
+    .build();
+```
+
 ## 🔧 Error Handling
 
 ### Compile-Time Error Examples

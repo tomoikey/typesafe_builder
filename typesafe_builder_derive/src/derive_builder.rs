@@ -14,7 +14,7 @@ use validate_condition::validate_condition_fields;
 
 pub fn derive_builder_impl(input: Input) -> Result<TokenStream2, darling::Error> {
     let name = input.ident();
-    let builder_name = Ident::new(&format!("{}Builder", name), name.span());
+    let builder_name = Ident::new(&input.builder_name(), name.span());
     let generics = input.generics();
 
     let field_infos = extract_field_infos(&input)?;
