@@ -191,3 +191,17 @@ fn generic_struct_where_clause_success() {
         .build();
     assert_eq!(container.value, "hello");
 }
+
+#[test]
+fn custom_builder_name_success() {
+    #[derive(Builder, PartialEq)]
+    #[builder(builder_name = "MyCustomBuilder")]
+    struct User {
+        #[builder(required)]
+        name: String,
+    }
+    let user = MyCustomBuilder::new()
+        .with_name("Alice".to_string())
+        .build();
+    assert_eq!(user.name, "Alice");
+}

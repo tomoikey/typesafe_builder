@@ -7,6 +7,8 @@ pub struct Input {
     ident: Ident,
     generics: Generics,
     data: darling::ast::Data<(), InputField>,
+    #[darling(default)]
+    builder_name: Option<String>,
 }
 
 impl Input {
@@ -20,6 +22,12 @@ impl Input {
 
     pub fn data(&self) -> darling::ast::Data<&(), &InputField> {
         self.data.as_ref()
+    }
+
+    pub fn builder_name(&self) -> String {
+        self.builder_name
+            .clone()
+            .unwrap_or_else(|| format!("{}Builder", self.ident))
     }
 }
 
