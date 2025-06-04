@@ -52,6 +52,7 @@ let user = UserBuilder::new()
 ### 🔒 **Type-Level Constraint System**
 - **Required Fields** - Completely prevent missing required field configuration
 - **Optional Fields** - Freely configurable fields
+- **Default Values** - Fields with intelligent default values using any Rust expression
 - **Conditional Requirements** - Express dynamic dependencies at the type level
 - **Complex Logic** - Support for AND/OR/NOT operators in complex conditional expressions
 
@@ -77,13 +78,15 @@ struct User {
     name: String,
     #[builder(optional)]
     age: Option<u32>,
+    #[builder(default = "String::from(\"user@example.com\")")]
+    email: String,
 }
 
 // Type-safe builder pattern
 let user = UserBuilder::new()
     .with_name("Alice".to_string())
     .with_age(30)
-    .build();
+    .build(); // email will be "user@example.com"
 ```
 
 ## 🚀 Advanced Features
@@ -195,7 +198,68 @@ let client3 = ApiClientBuilder::new()
     .build();
 ```
 
-### 4️⃣ **Negation Operator Support**
+### 4️⃣ **Default Values**
+
+```rust
+use typesafe_builder::*;
+
+#[derive(Builder)]
+struct ServerConfig {
+    #[builder(default = "String::from(\"localhost\")")]
+    host: String,
+    
+    #[builder(default = "8080")]
+    port: u16,
+    
+    #[builder(default = "vec![\"GET\".to_string(), \"POST\".to_string()]")]
+    allowed_methods: Vec<String>,
+    
+    #[builder(default = "std::collections::HashMap::new()")]
+    headers: std::collections::HashMap<String, String>,
+    
+    #[builder(required)]
+    service_name: String,
+    
+    #[builder(optional)]
+    ssl_cert: Option<String>,
+}
+
+// ✅ Use default values
+let config1 = ServerConfigBuilder::new()
+    .with_service_name("my-api".to_string())
+    .build();
+// host: "localhost", port: 8080, allowed_methods: ["GET", "POST"], headers: {}
+
+// ✅ Override some defaults
+let config2 = ServerConfigBuilder::new()
+    .with_service_name("my-api".to_string())
+    .with_host("0.0.0.0".to_string())
+    .with_port(3000)
+    .build();
+// host: "0.0.0.0", port: 3000, allowed_methods: ["GET", "POST"], headers: {}
+
+// ✅ Complex default expressions
+#[derive(Builder)]
+struct AppConfig {
+    #[builder(default = "std::env::var(\"APP_NAME\").unwrap_or_else(|_| \"default-app\".to_string())")]
+    app_name: String,
+    
+    #[builder(default = "chrono::Utc::now()")]
+    created_at: chrono::DateTime<chrono::Utc>,
+    
+    #[builder(default = "uuid::Uuid::new_v4()")]
+    instance_id: uuid::Uuid,
+}
+```
+
+**Key features of default values:**
+- **Flexible expressions**: Use any valid Rust expression as default value
+- **No type restrictions**: Works with primitives, collections, function calls, etc.
+- **Environment variables**: Access environment variables at build time
+- **Function calls**: Call any function or method as default value
+- **Standalone attribute**: Cannot be combined with `required`, `optional`, etc.
+
+### 5️⃣ **Negation Operator Support**
 
 ```rust
 use typesafe_builder::*;
@@ -217,7 +281,7 @@ let db = DatabaseBuilder::new()
     .build();
 ```
 
-### 5️⃣ **Custom Builder Name**
+### 6️⃣ **Custom Builder Name**
 
 ```rust
 use typesafe_builder::*;
@@ -292,8 +356,11 @@ struct ApiConfig {
     #[builder(required_if = "use_auth")]
     secret: Option<String>,
     
-    #[builder(optional)]
-    timeout_seconds: Option<u64>,
+    #[builder(default = "30")]
+    timeout_seconds: u64,
+    
+    #[builder(default = "String::from(\"application/json\")")]
+    content_type: String,
 }
 ```
 
@@ -307,6 +374,12 @@ struct DatabaseConfig {
     
     #[builder(required)]
     database: String,
+    
+    #[builder(default = "5432")]
+    port: u16,
+    
+    #[builder(default = "10")]
+    max_connections: u32,
     
     #[builder(optional)]
     use_ssl: Option<bool>,

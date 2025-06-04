@@ -205,3 +205,48 @@ fn custom_builder_name_success() {
         .build();
     assert_eq!(user.name, "Alice");
 }
+
+#[test]
+fn default_value_success() {
+    #[derive(Builder, PartialEq)]
+    struct Config {
+        #[builder(default = "String::from(\"default_name\")")]
+        name: String,
+        #[builder(default = "42")]
+        port: i32,
+        #[builder(optional)]
+        description: Option<String>,
+    }
+
+    let config = ConfigBuilder::new().build();
+    assert_eq!(config.name, "default_name");
+    assert_eq!(config.port, 42);
+    assert_eq!(config.description, None);
+
+    let config = ConfigBuilder::new()
+        .with_name("custom".to_string())
+        .with_port(8080)
+        .with_description("test".to_string())
+        .build();
+    assert_eq!(config.name, "custom");
+    assert_eq!(config.port, 8080);
+    assert_eq!(config.description, Some("test".to_string()));
+}
+
+#[test]
+fn complex_default_values() {
+    #[derive(Builder, PartialEq)]
+    struct ComplexConfig {
+        #[builder(default = "vec![1, 2, 3]")]
+        numbers: Vec<i32>,
+        #[builder(default = "std::collections::HashMap::new()")]
+        map: std::collections::HashMap<String, i32>,
+        #[builder(required)]
+        id: u32,
+    }
+
+    let config = ComplexConfigBuilder::new().with_id(1).build();
+    assert_eq!(config.numbers, vec![1, 2, 3]);
+    assert_eq!(config.map, std::collections::HashMap::new());
+    assert_eq!(config.id, 1);
+}

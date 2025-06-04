@@ -12,6 +12,8 @@ use quote::quote;
 use syn::{Ident, PathArguments, Type};
 use validate_condition::validate_condition_fields;
 
+type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>);
+
 pub fn derive_builder_impl(input: Input) -> Result<TokenStream2, darling::Error> {
     let name = input.ident();
     let builder_name = Ident::new(&input.builder_name(), name.span());
@@ -97,9 +99,7 @@ pub fn derive_builder_impl(input: Input) -> Result<TokenStream2, darling::Error>
     })
 }
 
-fn extract_field_infos(
-    builder_input: &Input,
-) -> Result<Vec<(Ident, Type, Requirement)>, darling::Error> {
+fn extract_field_infos(builder_input: &Input) -> Result<Vec<FieldInfo>, darling::Error> {
     let mut field_infos = Vec::new();
     let mut all_field_names = Vec::new();
 
@@ -149,7 +149,7 @@ fn extract_field_infos(
             Requirement::Optional | Requirement::Conditional(_) | Requirement::OptionalIf(_) => {
                 true
             }
-            Requirement::Always => false,
+            Requirement::Always | Requirement::Default => false,
         };
 
         if requirement_is_option_based && !is_type_option(field.ty()) {
@@ -166,7 +166,7 @@ fn extract_field_infos(
             .with_span(&field.ty()));
         }
 
-        field_infos.push((ident, field.ty().clone(), req));
+        field_infos.push((ident, field.ty().clone(), req, field.default().cloned()));
     }
 
     Ok(field_infos)
@@ -179,16 +179,16 @@ fn generate_type_params(n_fields: usize, span: proc_macro2::Span) -> Vec<Ident> 
 }
 
 fn generate_builder_fields<'a>(
-    field_infos: &'a [(Ident, Type, Requirement)],
+    field_infos: &'a [FieldInfo],
     type_params: &'a [Ident],
 ) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
     field_infos
         .iter()
         .zip(type_params.iter())
-        .map(|((ident, ty, req), tp)| {
+        .map(|((ident, ty, req, _), tp)| {
             let phantom = Ident::new(&format!("_{}", ident), ident.span());
             match req {
-                &Requirement::Always => {
+                &Requirement::Always | &Requirement::Default => {
                     quote! {
                         #ident : Option<#ty>,
                         #phantom : std::marker::PhantomData<#tp>,
@@ -207,13 +207,30 @@ fn generate_builder_fields<'a>(
 }
 
 fn generate_builder_initialization<'a>(
-    field_infos: &'a [(Ident, Type, Requirement)],
+    field_infos: &'a [FieldInfo],
 ) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
-    field_infos.iter().map(|(ident, _ty, _)| {
+    field_infos.iter().map(|(ident, _ty, req, default)| {
         let phantom = Ident::new(&format!("_{}", ident), ident.span());
-        quote! {
-            #ident : None,
-            #phantom : std::marker::PhantomData,
+        match req {
+            Requirement::Default => {
+                if let Some(default_expr) = default {
+                    quote! {
+                        #ident : Some(#default_expr),
+                        #phantom : std::marker::PhantomData,
+                    }
+                } else {
+                    quote! {
+                        #ident : None,
+                        #phantom : std::marker::PhantomData,
+                    }
+                }
+            }
+            _ => {
+                quote! {
+                    #ident : None,
+                    #phantom : std::marker::PhantomData,
+                }
+            }
         }
     })
 }
@@ -247,6 +264,6 @@ fn extract_arg_type(field_ty: &Type, req: &Requirement) -> proc_macro2::TokenStr
             }
             quote! { #field_ty }
         }
-        Requirement::Always => quote! { #field_ty },
+        Requirement::Always | Requirement::Default => quote! { #field_ty },
     }
 }

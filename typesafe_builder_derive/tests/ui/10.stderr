@@ -1,4 +1,4 @@
-error: Invalid requirement: Multiple builder attributes specified. Only one of required, optional, required_if, optional_if is allowed
+error: Invalid requirement: Multiple builder attributes specified. Only one of required, optional, required_if, optional_if, default is allowed
  --> tests/ui/10.rs:7:14
   |
 7 |     #[derive(Builder)]
