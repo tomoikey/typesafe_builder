@@ -52,6 +52,10 @@ pub struct InputField {
     /// #[builder(optional_if"...")]
     #[darling(rename = "optional_if", default)]
     optional_if: Option<String>,
+
+    /// #[builder(default = "...")]
+    #[darling(rename = "default", default)]
+    default: Option<Expr>,
 }
 
 impl InputField {
@@ -67,16 +71,19 @@ impl InputField {
         let attribute_count = self.optional_flag.is_present() as u8
             + self.required_flag.is_present() as u8
             + self.required_if.is_some() as u8
-            + self.optional_if.is_some() as u8;
+            + self.optional_if.is_some() as u8
+            + self.default.is_some() as u8;
 
         if attribute_count > 1 {
             return Err(syn::Error::new(
                 self.ident.as_ref().unwrap().span(),
-                "Multiple builder attributes specified. Only one of required, optional, required_if, optional_if is allowed",
+                "Multiple builder attributes specified. Only one of required, optional, required_if, optional_if, default is allowed",
             ));
         }
 
-        if let Some(opt_if) = &self.optional_if {
+        if self.default.is_some() {
+            Ok(Requirement::Default)
+        } else if let Some(opt_if) = &self.optional_if {
             let expr_result: Result<Expr, _> = syn::parse_str(opt_if);
             let expr: Expr = expr_result?;
             Ok(Requirement::OptionalIf(expr))
@@ -95,6 +102,10 @@ impl InputField {
             ))
         }
     }
+
+    pub fn default(&self) -> Option<&Expr> {
+        self.default.as_ref()
+    }
 }
 
 pub enum Requirement {
@@ -102,4 +113,5 @@ pub enum Requirement {
     Optional,
     Conditional(Expr),
     OptionalIf(Expr),
+    Default,
 }

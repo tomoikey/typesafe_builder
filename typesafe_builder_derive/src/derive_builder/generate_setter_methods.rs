@@ -2,8 +2,10 @@ use crate::{derive_builder::extract_arg_type, input::Requirement};
 use quote::quote;
 use syn::{Generics, Ident, Type};
 
+type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>);
+
 pub fn generate_setter_methods<'a>(
-    field_infos: &'a [(Ident, Type, Requirement)],
+    field_infos: &'a [FieldInfo],
     type_params: &'a [Ident],
     builder_name: &'a Ident,
     generics: &'a Generics,
@@ -12,7 +14,7 @@ pub fn generate_setter_methods<'a>(
     field_infos
         .iter()
         .enumerate()
-        .map(move |(idx, (field_ident, field_ty, req))| {
+        .map(move |(idx, (field_ident, field_ty, req, _default))| {
             let mut new_types = type_params.to_vec();
             new_types[idx] = Ident::new("_TypesafeBuilderFilled", span);
 
@@ -25,7 +27,7 @@ pub fn generate_setter_methods<'a>(
 
             let arg_ty = extract_arg_type(field_ty, req);
 
-            let setters_assign = field_infos.iter().map(|(fname, _ty, _)| {
+            let setters_assign = field_infos.iter().map(|(fname, _ty, _, _default)| {
                 let phantom = Ident::new(&format!("_{}", fname), fname.span());
                 if fname == field_ident {
                     match req {
@@ -35,7 +37,8 @@ pub fn generate_setter_methods<'a>(
                         },
                         Requirement::Conditional(_)
                         | Requirement::Always
-                        | Requirement::OptionalIf(_) => quote! {
+                        | Requirement::OptionalIf(_)
+                        | Requirement::Default => quote! {
                             #fname : Some(value),
                             #phantom : std::marker::PhantomData
                         },

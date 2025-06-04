@@ -4,8 +4,10 @@ use quote::quote;
 use std::collections::HashMap;
 use syn::{Generics, Ident, Type};
 
+type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>);
+
 pub fn generate_build_methods(
-    field_infos: &[(Ident, Type, Requirement)],
+    field_infos: &[FieldInfo],
     builder_name: &Ident,
     struct_name: &Ident,
     generics: &Generics,
@@ -30,18 +32,27 @@ pub fn generate_build_methods(
             })
             .collect::<Vec<_>>();
 
-        let build_fields = field_infos.iter().map(|(ident, _ty, req)| match req {
-            Requirement::Always => {
-                quote! { #ident : self.#ident.unwrap() }
-            }
-            Requirement::Conditional(_) => {
-                quote! { #ident : self.#ident }
-            }
-            Requirement::Optional => quote! { #ident : self.#ident },
-            Requirement::OptionalIf(_) => {
-                quote! { #ident : self.#ident }
-            }
-        });
+        let build_fields = field_infos
+            .iter()
+            .map(|(ident, _ty, req, default)| match req {
+                Requirement::Always => {
+                    quote! { #ident : self.#ident.unwrap() }
+                }
+                Requirement::Default => {
+                    if let Some(default_expr) = default {
+                        quote! { #ident : self.#ident.unwrap_or_else(|| #default_expr) }
+                    } else {
+                        quote! { #ident : self.#ident.unwrap() }
+                    }
+                }
+                Requirement::Conditional(_) => {
+                    quote! { #ident : self.#ident }
+                }
+                Requirement::Optional => quote! { #ident : self.#ident },
+                Requirement::OptionalIf(_) => {
+                    quote! { #ident : self.#ident }
+                }
+            });
 
         let impl_block = if generic_params.is_empty() {
             quote! {
@@ -71,20 +82,23 @@ pub fn generate_build_methods(
     build_impls
 }
 
-fn is_mask_valid(mask: u32, field_infos: &[(Ident, Type, Requirement)]) -> bool {
+fn is_mask_valid(mask: u32, field_infos: &[FieldInfo]) -> bool {
     let _n_fields = field_infos.len();
     let mut var_map = HashMap::<String, bool>::new();
 
-    for (idx, (ident, _, _)) in field_infos.iter().enumerate() {
+    for (idx, (ident, _, _, _)) in field_infos.iter().enumerate() {
         var_map.insert(ident.to_string(), (mask & (1 << idx)) != 0);
     }
 
-    for (idx, (_, _, req)) in field_infos.iter().enumerate() {
+    for (idx, (_, _, req, _default)) in field_infos.iter().enumerate() {
         match req {
             Requirement::Always => {
                 if (mask & (1 << idx)) == 0 {
                     return false;
                 }
+            }
+            Requirement::Default => {
+                // Default fields can always be built (they have default values)
             }
             Requirement::Conditional(expr) => {
                 let mut cond_vars = var_map.clone();
