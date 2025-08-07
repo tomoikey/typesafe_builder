@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🦀 TypeSafe Builder 🦀
+# TypeSafe Builder
 
 <div>
     <img src="https://img.shields.io/crates/v/typesafe_builder.svg" alt="crates.io"/>
@@ -18,7 +18,7 @@
     </a>
 </div>
 
-<h3>🚀 Compile-Time Type Safety • 🧬 Zero Runtime Cost • ⚡ Blazing Fast Builds</h3>
+<h3>Compile-Time Type Safety • Zero Runtime Cost • Blazing Fast Builds</h3>
 
 **The Ultimate Builder Pattern Implementation Powered by Rust's Type System**
 
@@ -29,7 +29,7 @@
 ---
 </div>
 
-## ✨ Why TypeSafe Builder?
+## Why TypeSafe Builder?
 
 Traditional builder patterns can't detect missing required fields until runtime.
 **TypeSafe Builder** leverages Rust's powerful type system to verify all constraints **at compile time**.
@@ -47,22 +47,23 @@ let user = UserBuilder::new()
     .build(); // Always guaranteed to succeed
 ```
 
-## 🎯 Key Features
+## Key Features
 
-### 🔒 **Type-Level Constraint System**
+### Type-Level Constraint System
 - **Required Fields** - Completely prevent missing required field configuration
 - **Optional Fields** - Freely configurable fields
 - **Default Values** - Fields with intelligent default values using any Rust expression
 - **Conditional Requirements** - Express dynamic dependencies at the type level
 - **Complex Logic** - Support for AND/OR/NOT operators in complex conditional expressions
+- **Into Conversion** - Ergonomic setters with automatic type conversion via `Into<T>`
 
-### ⚡ **Performance Characteristics**
+### Performance Characteristics
 - **Zero Runtime Cost** - All validation completed at compile time
 
-### 🛡️ **Safety Guarantees**
+### Safety Guarantees
 - **No Panic** - Complete elimination of runtime panics
 
-## 📦 Quick Start
+## Quick Start
 
 ```toml
 [dependencies]
@@ -89,9 +90,9 @@ let user = UserBuilder::new()
     .build(); // email will be "user@example.com"
 ```
 
-## 🚀 Advanced Features
+## Advanced Features
 
-### 1️⃣ **Conditional Required Fields**
+### 1. Conditional Required Fields
 
 ```rust
 use typesafe_builder::*;
@@ -107,7 +108,7 @@ struct Account {
 // ✅ Compiles successfully
 let account1 = AccountBuilder::new().build();
 
-// ✅ Compiles successfully  
+// ✅ Compiles successfully
 let account2 = AccountBuilder::new()
     .with_email("user@example.com".to_string())
     .with_email_verified(true)
@@ -119,7 +120,7 @@ let account2 = AccountBuilder::new()
 //     .build();
 ```
 
-### 2️⃣ **Conditional Optional Fields**
+### 2. Conditional Optional Fields
 
 ```rust
 use typesafe_builder::*;
@@ -143,7 +144,7 @@ let config2 = ConfigBuilder::new()
     .build();
 ```
 
-### 3️⃣ **Complex Conditional Logic**
+### 3. Complex Conditional Logic
 
 ```rust
 use typesafe_builder::*;
@@ -152,23 +153,23 @@ use typesafe_builder::*;
 struct ApiClient {
     #[builder(optional)]
     use_auth: Option<bool>,
-    #[builder(optional)]  
+    #[builder(optional)]
     use_https: Option<bool>,
     #[builder(optional)]
     api_key: Option<String>,
-    
+
     // Secret is required if using auth OR HTTPS
     #[builder(required_if = "use_auth || use_https")]
     secret: Option<String>,
-    
+
     // Certificate is required only when using both auth AND HTTPS
     #[builder(required_if = "use_auth && use_https")]
     certificate: Option<String>,
-    
+
     // Warning is required when using neither auth NOR HTTPS
     #[builder(required_if = "!use_auth && !use_https")]
     insecure_warning: Option<String>,
-    
+
     // Complex condition: Token required when (auth OR HTTPS) AND (no API key)
     #[builder(required_if = "(use_auth || use_https) && !api_key")]
     fallback_token: Option<String>,
@@ -198,7 +199,7 @@ let client3 = ApiClientBuilder::new()
     .build();
 ```
 
-### 4️⃣ **Default Values**
+### 4. Default Values
 
 ```rust
 use typesafe_builder::*;
@@ -207,19 +208,19 @@ use typesafe_builder::*;
 struct ServerConfig {
     #[builder(default = "String::from(\"localhost\")")]
     host: String,
-    
+
     #[builder(default = "8080")]
     port: u16,
-    
+
     #[builder(default = "vec![\"GET\".to_string(), \"POST\".to_string()]")]
     allowed_methods: Vec<String>,
-    
+
     #[builder(default = "std::collections::HashMap::new()")]
     headers: std::collections::HashMap<String, String>,
-    
+
     #[builder(required)]
     service_name: String,
-    
+
     #[builder(optional)]
     ssl_cert: Option<String>,
 }
@@ -243,23 +244,23 @@ let config2 = ServerConfigBuilder::new()
 struct AppConfig {
     #[builder(default = "std::env::var(\"APP_NAME\").unwrap_or_else(|_| \"default-app\".to_string())")]
     app_name: String,
-    
+
     #[builder(default = "chrono::Utc::now()")]
     created_at: chrono::DateTime<chrono::Utc>,
-    
+
     #[builder(default = "uuid::Uuid::new_v4()")]
     instance_id: uuid::Uuid,
 }
 ```
 
-**Key features of default values:**
-- **Flexible expressions**: Use any valid Rust expression as default value
-- **No type restrictions**: Works with primitives, collections, function calls, etc.
-- **Environment variables**: Access environment variables at build time
-- **Function calls**: Call any function or method as default value
-- **Standalone attribute**: Cannot be combined with `required`, `optional`, etc.
+Key features of default values:
+- Flexible expressions: Use any valid Rust expression as default value
+- No type restrictions: Works with primitives, collections, function calls, etc.
+- Environment variables: Access environment variables at build time
+- Function calls: Call any function or method as default value
+- Standalone attribute: Cannot be combined with `required`, `optional`, etc.
 
-### 5️⃣ **Negation Operator Support**
+### 5. Negation Operator Support
 
 ```rust
 use typesafe_builder::*;
@@ -268,7 +269,7 @@ use typesafe_builder::*;
 struct Database {
     #[builder(optional)]
     use_ssl: Option<bool>,
-    
+
     // Warning message required when NOT using SSL
     #[builder(required_if = "!use_ssl")]
     warning_message: Option<String>,
@@ -281,7 +282,43 @@ let db = DatabaseBuilder::new()
     .build();
 ```
 
-### 6️⃣ **Custom Builder Name**
+### 6. Into Conversion Support
+
+The `#[builder(into)]` attribute allows setter methods to accept any type that implements `Into<T>` for the field type `T`, providing more ergonomic APIs:
+
+```rust
+use typesafe_builder::*;
+
+#[derive(Builder)]
+struct User {
+    #[builder(required)]
+    #[builder(into)]
+    name: String,
+
+    #[builder(optional)]
+    #[builder(into)]
+    email: Option<String>,
+}
+
+// ✅ Accept &str directly (converts to String via Into)
+let user1 = UserBuilder::new()
+    .with_name("Alice")  // &str -> String
+    .with_email("alice@example.com")  // &str -> String
+    .build();
+
+// ✅ Still works with String directly
+let user2 = UserBuilder::new()
+    .with_name("Bob".to_string())
+    .build();
+```
+
+Key benefits:
+- Ergonomic APIs: Accept `&str` for `String` fields without manual conversion
+- Type flexibility: Any `Into<T>` implementation works automatically
+- Zero overhead: Conversion happens at the call site
+- Backward compatible: Works alongside existing setter patterns
+
+### 7. Custom Builder Name
 
 ```rust
 use typesafe_builder::*;
@@ -299,7 +336,7 @@ let user = MyCustomBuilder::new()
     .build();
 ```
 
-## 🔧 Error Handling
+## Error Handling
 
 ### Compile-Time Error Examples
 
@@ -312,7 +349,7 @@ struct User {
 
 // ❌ Compile error
 let user = UserBuilder::new().build();
-//                           ^^^^^ 
+//                           ^^^^^
 // error: no method named `build` found for struct `UserBuilder<_TypesafeBuilderEmpty>`
 //        method `build` is available on `UserBuilder<_TypesafeBuilderFilled>`
 ```
@@ -332,12 +369,12 @@ struct Config {
 let config = ConfigBuilder::new()
     .with_feature(true)
     .build();
-//   ^^^^^ 
+//   ^^^^^
 // error: no method named `build` found for struct `ConfigBuilder<_TypesafeBuilderFilled, _TypesafeBuilderEmpty>`
 //        method `build` is available on `ConfigBuilder<_TypesafeBuilderFilled, _TypesafeBuilderFilled>`
 ```
 
-## 🔍 Real-World Use Cases
+## Real-World Use Cases
 
 ### Web API Configuration
 
@@ -346,19 +383,19 @@ let config = ConfigBuilder::new()
 struct ApiConfig {
     #[builder(required)]
     base_url: String,
-    
+
     #[builder(optional)]
     use_auth: Option<bool>,
-    
+
     #[builder(required_if = "use_auth")]
     api_key: Option<String>,
-    
+
     #[builder(required_if = "use_auth")]
     secret: Option<String>,
-    
+
     #[builder(default = "30")]
     timeout_seconds: u64,
-    
+
     #[builder(default = "String::from(\"application/json\")")]
     content_type: String,
 }
@@ -371,28 +408,28 @@ struct ApiConfig {
 struct DatabaseConfig {
     #[builder(required)]
     host: String,
-    
+
     #[builder(required)]
     database: String,
-    
+
     #[builder(default = "5432")]
     port: u16,
-    
+
     #[builder(default = "10")]
     max_connections: u32,
-    
+
     #[builder(optional)]
     use_ssl: Option<bool>,
-    
+
     #[builder(required_if = "use_ssl")]
     ssl_cert_path: Option<String>,
-    
+
     #[builder(optional_if = "!use_ssl")]
     allow_insecure: Option<bool>,
 }
 ```
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions to TypeSafe Builder!
 
@@ -414,7 +451,7 @@ cargo test
 cargo test --package typesafe_builder_derive --test ui
 ```
 
-## 👥 Contributors
+## Contributors
 
 Amazing developers who have contributed to this project:
 
@@ -428,7 +465,7 @@ Amazing developers who have contributed to this project:
         <br />
         <sub><b>tomoikey</b></sub>
         <br />
-        <sub>🧠 Creator & Maintainer</sub>
+        <sub>Creator & Maintainer</sub>
       </a>
     </td>
     <td align="center">
@@ -437,7 +474,7 @@ Amazing developers who have contributed to this project:
         <br />
         <sub><b>ramsyana</b></sub>
         <br />
-        <sub>🔧 Contributor</sub>
+        <sub>Contributor</sub>
       </a>
     </td>
     <td align="center">
@@ -446,7 +483,7 @@ Amazing developers who have contributed to this project:
         <br />
         <sub><b>Your Name Here</b></sub>
         <br />
-        <sub>🚀 Next Contributor</sub>
+        <sub>Next Contributor</sub>
       </a>
     </td>
   </tr>
@@ -458,13 +495,13 @@ Amazing developers who have contributed to this project:
 
 </div>
 
-## 📄 License
+## License
 
 MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌟 Give us a star!
+## Give us a star!
 
-If you find this project useful, please consider giving it a ⭐!
+If you find this project useful, please consider giving it a star!
 
 ---
 

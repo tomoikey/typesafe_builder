@@ -56,6 +56,10 @@ pub struct InputField {
     /// #[builder(default = "...")]
     #[darling(rename = "default", default)]
     default: Option<Expr>,
+
+    /// #[builder(into)]
+    #[darling(rename = "into", default)]
+    into_flag: Flag,
 }
 
 impl InputField {
@@ -105,6 +109,10 @@ impl InputField {
 
     pub fn default(&self) -> Option<&Expr> {
         self.default.as_ref()
+    }
+
+    pub fn into(&self) -> bool {
+        self.into_flag.is_present()
     }
 }
 

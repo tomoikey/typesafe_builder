@@ -250,3 +250,24 @@ fn complex_default_values() {
     assert_eq!(config.map, std::collections::HashMap::new());
     assert_eq!(config.id, 1);
 }
+
+#[test]
+fn into_value_success() {
+    #[derive(Builder, PartialEq)]
+    struct User {
+        #[builder(required)]
+        #[builder(into)]
+        name: String,
+        #[builder(optional)]
+        #[builder(into)]
+        address: Option<String>,
+    }
+
+    let user = UserBuilder::new()
+        .with_name("Alice")
+        .with_address("foo")
+        .build();
+
+    assert_eq!(user.name, "Alice");
+    assert_eq!(user.address, Some("foo".to_string()));
+}

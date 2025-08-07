@@ -4,7 +4,7 @@ use quote::quote;
 use std::collections::HashMap;
 use syn::{Generics, Ident, Type};
 
-type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>);
+type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>, bool);
 
 pub fn generate_build_methods(
     field_infos: &[FieldInfo],
@@ -34,7 +34,7 @@ pub fn generate_build_methods(
 
         let build_fields = field_infos
             .iter()
-            .map(|(ident, _ty, req, default)| match req {
+            .map(|(ident, _ty, req, default, _)| match req {
                 Requirement::Always => {
                     quote! { #ident : self.#ident.unwrap() }
                 }
@@ -86,11 +86,11 @@ fn is_mask_valid(mask: u32, field_infos: &[FieldInfo]) -> bool {
     let _n_fields = field_infos.len();
     let mut var_map = HashMap::<String, bool>::new();
 
-    for (idx, (ident, _, _, _)) in field_infos.iter().enumerate() {
+    for (idx, (ident, _, _, _, _)) in field_infos.iter().enumerate() {
         var_map.insert(ident.to_string(), (mask & (1 << idx)) != 0);
     }
 
-    for (idx, (_, _, req, _default)) in field_infos.iter().enumerate() {
+    for (idx, (_, _, req, _default, _)) in field_infos.iter().enumerate() {
         match req {
             Requirement::Always => {
                 if (mask & (1 << idx)) == 0 {
