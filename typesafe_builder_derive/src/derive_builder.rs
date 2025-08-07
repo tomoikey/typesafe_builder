@@ -3,7 +3,10 @@ mod generate_build_methods;
 mod generate_setter_methods;
 mod validate_condition;
 
-use crate::{Input, input::Requirement};
+use crate::{
+    Input,
+    input::{InputField, Requirement},
+};
 use eval_condition::eval_condition;
 use generate_build_methods::generate_build_methods;
 use generate_setter_methods::generate_setter_methods;
@@ -12,7 +15,7 @@ use quote::quote;
 use syn::{Ident, PathArguments, Type};
 use validate_condition::validate_condition_fields;
 
-type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>);
+type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>, bool);
 
 pub fn derive_builder_impl(input: Input) -> Result<TokenStream2, darling::Error> {
     let name = input.ident();
@@ -131,18 +134,18 @@ fn extract_field_infos(builder_input: &Input) -> Result<Vec<FieldInfo>, darling:
 
         let req = field
             .requirement()
-            .map_err(|err| darling::Error::custom(format!("Invalid requirement: {}", err)))?;
+            .map_err(|err| darling::Error::custom(format!("Invalid requirement: {err}")))?;
 
-        if let Requirement::Conditional(expr) = &req {
-            if let Err(err) = validate_condition_fields(expr, &all_field_names) {
-                return Err(darling::Error::custom(err));
-            }
+        if let Requirement::Conditional(expr) = &req
+            && let Err(err) = validate_condition_fields(expr, &all_field_names)
+        {
+            return Err(darling::Error::custom(err));
         }
 
-        if let Requirement::OptionalIf(expr) = &req {
-            if let Err(err) = validate_condition_fields(expr, &all_field_names) {
-                return Err(darling::Error::custom(err));
-            }
+        if let Requirement::OptionalIf(expr) = &req
+            && let Err(err) = validate_condition_fields(expr, &all_field_names)
+        {
+            return Err(darling::Error::custom(err));
         }
 
         let requirement_is_option_based = match &req {
@@ -160,13 +163,18 @@ fn extract_field_infos(builder_input: &Input) -> Result<Vec<FieldInfo>, darling:
                 _ => unreachable!(),
             };
             return Err(darling::Error::custom(format!(
-                "Field `{}` marked with `#[builder({})]` must be of type `Option<T>`",
-                ident, requirement_name
+                "Field `{ident}` marked with `#[builder({requirement_name})]` must be of type `Option<T>`"
             ))
             .with_span(&field.ty()));
         }
 
-        field_infos.push((ident, field.ty().clone(), req, field.default().cloned()));
+        field_infos.push((
+            ident,
+            field.ty().clone(),
+            req,
+            field.default().cloned(),
+            InputField::into(field),
+        ));
     }
 
     Ok(field_infos)
@@ -174,7 +182,7 @@ fn extract_field_infos(builder_input: &Input) -> Result<Vec<FieldInfo>, darling:
 
 fn generate_type_params(n_fields: usize, span: proc_macro2::Span) -> Vec<Ident> {
     (0..n_fields)
-        .map(|i| Ident::new(&format!("_TypesafeBuilder{}", i), span))
+        .map(|i| Ident::new(&format!("_TypesafeBuilder{i}"), span))
         .collect()
 }
 
@@ -185,8 +193,8 @@ fn generate_builder_fields<'a>(
     field_infos
         .iter()
         .zip(type_params.iter())
-        .map(|((ident, ty, req, _), tp)| {
-            let phantom = Ident::new(&format!("_{}", ident), ident.span());
+        .map(|((ident, ty, req, _, _), tp)| {
+            let phantom = Ident::new(&format!("_{ident}"), ident.span());
             match req {
                 &Requirement::Always | &Requirement::Default => {
                     quote! {
@@ -209,8 +217,8 @@ fn generate_builder_fields<'a>(
 fn generate_builder_initialization<'a>(
     field_infos: &'a [FieldInfo],
 ) -> impl Iterator<Item = proc_macro2::TokenStream> + 'a {
-    field_infos.iter().map(|(ident, _ty, req, default)| {
-        let phantom = Ident::new(&format!("_{}", ident), ident.span());
+    field_infos.iter().map(|(ident, _ty, req, default, _)| {
+        let phantom = Ident::new(&format!("_{ident}"), ident.span());
         match req {
             Requirement::Default => {
                 if let Some(default_expr) = default {
@@ -236,14 +244,12 @@ fn generate_builder_initialization<'a>(
 }
 
 fn is_type_option(field_ty: &Type) -> bool {
-    if let Type::Path(type_path) = field_ty {
-        if let Some(last_segment) = type_path.path.segments.last() {
-            if last_segment.ident == "Option" {
-                if let PathArguments::AngleBracketed(params) = &last_segment.arguments {
-                    return !params.args.is_empty(); // Option<T> has one arg
-                }
-            }
-        }
+    if let Type::Path(type_path) = field_ty
+        && let Some(last_segment) = type_path.path.segments.last()
+        && last_segment.ident == "Option"
+        && let PathArguments::AngleBracketed(params) = &last_segment.arguments
+    {
+        return !params.args.is_empty(); // Option<T> has one arg
     }
     false
 }
@@ -251,16 +257,13 @@ fn is_type_option(field_ty: &Type) -> bool {
 fn extract_arg_type(field_ty: &Type, req: &Requirement) -> proc_macro2::TokenStream {
     match req {
         Requirement::Optional | Requirement::Conditional(_) | Requirement::OptionalIf(_) => {
-            if let Type::Path(path) = field_ty {
-                if let Some(seg) = path.path.segments.last() {
-                    if seg.ident == "Option" {
-                        if let PathArguments::AngleBracketed(ab) = &seg.arguments {
-                            if let Some(syn::GenericArgument::Type(inner)) = ab.args.first() {
-                                return quote! { #inner };
-                            }
-                        }
-                    }
-                }
+            if let Type::Path(path) = field_ty
+                && let Some(seg) = path.path.segments.last()
+                && seg.ident == "Option"
+                && let PathArguments::AngleBracketed(ab) = &seg.arguments
+                && let Some(syn::GenericArgument::Type(inner)) = ab.args.first()
+            {
+                return quote! { #inner };
             }
             quote! { #field_ty }
         }

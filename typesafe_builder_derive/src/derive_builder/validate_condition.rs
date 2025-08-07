@@ -5,7 +5,7 @@ pub fn validate_condition_fields(expr: &Expr, available_fields: &[String]) -> Re
         Expr::Path(ExprPath { path, .. }) => {
             let key = path.segments.last().unwrap().ident.to_string();
             if !available_fields.contains(&key) {
-                return Err(format!("Field '{}' used in condition does not exist", key));
+                return Err(format!("Field '{key}' used in condition does not exist"));
             }
             Ok(())
         }
