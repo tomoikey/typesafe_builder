@@ -13,10 +13,10 @@ description = "A procedural macro to generate type-safe builder patterns for Rus
 proc-macro = true
 
 [dependencies]
-darling = "0.20.11"
+darling = "0.21.1"
 proc-macro2 = "1.0.95"
-syn = { version = "2.0.101", features = ["derive", "parsing", "proc-macro"] }
+syn = { version = "2.0.104", features = ["derive", "parsing", "proc-macro"] }
 quote = "1.0.40"
 
 [dev-dependencies]
-trybuild = "1.0.105"
+trybuild = "1.0.110"
