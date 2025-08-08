@@ -5,7 +5,7 @@ mod validate_condition;
 
 use crate::{
     Input,
-    input::{InputField, Requirement},
+    input::{DefaultValue, InputField, Requirement},
 };
 use eval_condition::eval_condition;
 use generate_build_methods::generate_build_methods;
@@ -15,7 +15,7 @@ use quote::quote;
 use syn::{Ident, PathArguments, Type};
 use validate_condition::validate_condition_fields;
 
-type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>, bool);
+type FieldInfo = (Ident, Type, Requirement, Option<DefaultValue>, bool);
 
 pub fn derive_builder_impl(input: Input) -> Result<TokenStream2, darling::Error> {
     let name = input.ident();
@@ -221,10 +221,20 @@ fn generate_builder_initialization<'a>(
         let phantom = Ident::new(&format!("_{ident}"), ident.span());
         match req {
             Requirement::Default => {
-                if let Some(default_expr) = default {
-                    quote! {
-                        #ident : Some(#default_expr),
-                        #phantom : std::marker::PhantomData,
+                if let Some(default_val) = default {
+                    match default_val {
+                        DefaultValue::Bare => {
+                            quote! {
+                                #ident : Some(Default::default()),
+                                #phantom : std::marker::PhantomData,
+                            }
+                        }
+                        DefaultValue::Expression(expr) => {
+                            quote! {
+                                #ident : Some(#expr),
+                                #phantom : std::marker::PhantomData,
+                            }
+                        }
                     }
                 } else {
                     quote! {

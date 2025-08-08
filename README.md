@@ -52,7 +52,7 @@ let user = UserBuilder::new()
 ### Type-Level Constraint System
 - **Required Fields** - Completely prevent missing required field configuration
 - **Optional Fields** - Freely configurable fields
-- **Default Values** - Fields with intelligent default values using any Rust expression
+- **Default Values** - Fields with intelligent default values using `Default::default()` or custom expressions
 - **Conditional Requirements** - Express dynamic dependencies at the type level
 - **Complex Logic** - Support for AND/OR/NOT operators in complex conditional expressions
 - **Into Conversion** - Ergonomic setters with automatic type conversion via `Into<T>`
@@ -81,13 +81,15 @@ struct User {
     age: Option<u32>,
     #[builder(default = "String::from(\"user@example.com\")")]
     email: String,
+    #[builder(default)]
+    active: bool,
 }
 
 // Type-safe builder pattern
 let user = UserBuilder::new()
     .with_name("Alice".to_string())
     .with_age(30)
-    .build(); // email will be "user@example.com"
+    .build(); // email will be "user@example.com", active will be false
 ```
 
 ## Advanced Features
@@ -108,7 +110,7 @@ struct Account {
 // ✅ Compiles successfully
 let account1 = AccountBuilder::new().build();
 
-// ✅ Compiles successfully  
+// ✅ Compiles successfully
 let account2 = AccountBuilder::new()
     .with_email("user@example.com".to_string())
     .with_email_verified(true)
@@ -153,23 +155,23 @@ use typesafe_builder::*;
 struct ApiClient {
     #[builder(optional)]
     use_auth: Option<bool>,
-    #[builder(optional)]  
+    #[builder(optional)]
     use_https: Option<bool>,
     #[builder(optional)]
     api_key: Option<String>,
-    
+
     // Secret is required if using auth OR HTTPS
     #[builder(required_if = "use_auth || use_https")]
     secret: Option<String>,
-    
+
     // Certificate is required only when using both auth AND HTTPS
     #[builder(required_if = "use_auth && use_https")]
     certificate: Option<String>,
-    
+
     // Warning is required when using neither auth NOR HTTPS
     #[builder(required_if = "!use_auth && !use_https")]
     insecure_warning: Option<String>,
-    
+
     // Complex condition: Token required when (auth OR HTTPS) AND (no API key)
     #[builder(required_if = "(use_auth || use_https) && !api_key")]
     fallback_token: Option<String>,
@@ -201,6 +203,52 @@ let client3 = ApiClientBuilder::new()
 
 ### 4. Default Values
 
+TypeSafe Builder supports two ways to specify default values:
+
+#### Simple Default Values (using `Default::default()`)
+
+```rust
+use typesafe_builder::*;
+
+#[derive(Builder)]
+struct Config {
+    // Uses String::default() (empty string)
+    #[builder(default)]
+    name: String,
+
+    // Uses i32::default() (0)
+    #[builder(default)]
+    port: i32,
+
+    // Uses bool::default() (false)
+    #[builder(default)]
+    enabled: bool,
+
+    // Uses Vec::default() (empty vector)
+    #[builder(default)]
+    items: Vec<String>,
+
+    // Uses HashMap::default() (empty map)
+    #[builder(default)]
+    metadata: std::collections::HashMap<String, String>,
+
+    // Works with custom types that implement Default
+    #[builder(default)]
+    custom_field: MyCustomType,
+
+    #[builder(required)]
+    service_name: String,
+}
+
+// ✅ Use default values
+let config = ConfigBuilder::new()
+    .with_service_name("my-service".to_string())
+    .build();
+// name: "", port: 0, enabled: false, items: [], metadata: {}, custom_field: MyCustomType::default()
+```
+
+#### Custom Default Expressions
+
 ```rust
 use typesafe_builder::*;
 
@@ -208,19 +256,19 @@ use typesafe_builder::*;
 struct ServerConfig {
     #[builder(default = "String::from(\"localhost\")")]
     host: String,
-    
+
     #[builder(default = "8080")]
     port: u16,
-    
+
     #[builder(default = "vec![\"GET\".to_string(), \"POST\".to_string()]")]
     allowed_methods: Vec<String>,
-    
+
     #[builder(default = "std::collections::HashMap::new()")]
     headers: std::collections::HashMap<String, String>,
-    
+
     #[builder(required)]
     service_name: String,
-    
+
     #[builder(optional)]
     ssl_cert: Option<String>,
 }
@@ -244,21 +292,51 @@ let config2 = ServerConfigBuilder::new()
 struct AppConfig {
     #[builder(default = "std::env::var(\"APP_NAME\").unwrap_or_else(|_| \"default-app\".to_string())")]
     app_name: String,
-    
+
     #[builder(default = "chrono::Utc::now()")]
     created_at: chrono::DateTime<chrono::Utc>,
-    
+
     #[builder(default = "uuid::Uuid::new_v4()")]
     instance_id: uuid::Uuid,
 }
 ```
 
+#### Mixed Default Types
+
+```rust
+use typesafe_builder::*;
+
+#[derive(Builder)]
+struct MixedConfig {
+    // Simple default (uses Default::default())
+    #[builder(default)]
+    name: String,
+
+    // Custom expression default
+    #[builder(default = "42")]
+    port: i32,
+
+    // Simple default for collections
+    #[builder(default)]
+    tags: Vec<String>,
+
+    // Custom expression for complex initialization
+    #[builder(default = "std::collections::HashMap::from([(\"key\".to_string(), \"value\".to_string())])")]
+    metadata: std::collections::HashMap<String, String>,
+}
+
+let config = MixedConfigBuilder::new().build();
+// name: "", port: 42, tags: [], metadata: {"key": "value"}
+```
+
 Key features of default values:
-- Flexible expressions: Use any valid Rust expression as default value
-- No type restrictions: Works with primitives, collections, function calls, etc.
-- Environment variables: Access environment variables at build time
-- Function calls: Call any function or method as default value
-- Standalone attribute: Cannot be combined with `required`, `optional`, etc.
+- **Simple defaults**: Use `#[builder(default)]` for types implementing `Default`
+- **Custom expressions**: Use `#[builder(default = "expression")]` for any valid Rust expression
+- **No type restrictions**: Works with primitives, collections, function calls, etc.
+- **Environment variables**: Access environment variables at build time (custom expressions)
+- **Function calls**: Call any function or method as default value (custom expressions)
+- **Standalone attribute**: Cannot be combined with `required`, `optional`, etc.
+- **Zero runtime cost**: All defaults are computed at build time
 
 ### 5. Negation Operator Support
 
@@ -269,7 +347,7 @@ use typesafe_builder::*;
 struct Database {
     #[builder(optional)]
     use_ssl: Option<bool>,
-    
+
     // Warning message required when NOT using SSL
     #[builder(required_if = "!use_ssl")]
     warning_message: Option<String>,
@@ -294,7 +372,7 @@ struct User {
     #[builder(required)]
     #[builder(into)]
     name: String,
-    
+
     #[builder(optional)]
     #[builder(into)]
     email: Option<String>,
@@ -349,7 +427,7 @@ struct User {
 
 // ❌ Compile error
 let user = UserBuilder::new().build();
-//                           ^^^^^ 
+//                           ^^^^^
 // error: no method named `build` found for struct `UserBuilder<_TypesafeBuilderEmpty>`
 //        method `build` is available on `UserBuilder<_TypesafeBuilderFilled>`
 ```
@@ -369,7 +447,7 @@ struct Config {
 let config = ConfigBuilder::new()
     .with_feature(true)
     .build();
-//   ^^^^^ 
+//   ^^^^^
 // error: no method named `build` found for struct `ConfigBuilder<_TypesafeBuilderFilled, _TypesafeBuilderEmpty>`
 //        method `build` is available on `ConfigBuilder<_TypesafeBuilderFilled, _TypesafeBuilderFilled>`
 ```
@@ -383,19 +461,19 @@ let config = ConfigBuilder::new()
 struct ApiConfig {
     #[builder(required)]
     base_url: String,
-    
+
     #[builder(optional)]
     use_auth: Option<bool>,
-    
+
     #[builder(required_if = "use_auth")]
     api_key: Option<String>,
-    
+
     #[builder(required_if = "use_auth")]
     secret: Option<String>,
-    
+
     #[builder(default = "30")]
     timeout_seconds: u64,
-    
+
     #[builder(default = "String::from(\"application/json\")")]
     content_type: String,
 }
@@ -408,22 +486,22 @@ struct ApiConfig {
 struct DatabaseConfig {
     #[builder(required)]
     host: String,
-    
+
     #[builder(required)]
     database: String,
-    
+
     #[builder(default = "5432")]
     port: u16,
-    
+
     #[builder(default = "10")]
     max_connections: u32,
-    
+
     #[builder(optional)]
     use_ssl: Option<bool>,
-    
+
     #[builder(required_if = "use_ssl")]
     ssl_cert_path: Option<String>,
-    
+
     #[builder(optional_if = "!use_ssl")]
     allow_insecure: Option<bool>,
 }

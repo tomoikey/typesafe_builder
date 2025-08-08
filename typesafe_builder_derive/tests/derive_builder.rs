@@ -271,3 +271,65 @@ fn into_value_success() {
     assert_eq!(user.name, "Alice");
     assert_eq!(user.address, Some("foo".to_string()));
 }
+
+#[test]
+fn bare_default_success() {
+    #[derive(Builder, PartialEq)]
+    struct Config {
+        #[builder(default)]
+        name: String,
+        #[builder(default)]
+        port: i32,
+        #[builder(default)]
+        enabled: bool,
+    }
+
+    let config = ConfigBuilder::new().build();
+    assert_eq!(config.name, String::default());
+    assert_eq!(config.port, i32::default());
+    assert_eq!(config.enabled, bool::default());
+
+    let config = ConfigBuilder::new()
+        .with_name("custom".to_string())
+        .with_port(8080)
+        .with_enabled(true)
+        .build();
+    assert_eq!(config.name, "custom");
+    assert_eq!(config.port, 8080);
+    assert_eq!(config.enabled, true);
+}
+
+#[test]
+fn mixed_default_and_expression_default() {
+    #[derive(Builder, PartialEq)]
+    struct Config {
+        #[builder(default)]
+        name: String,
+        #[builder(default = "42")]
+        port: i32,
+        #[builder(default = "vec![1, 2, 3]")]
+        numbers: Vec<i32>,
+    }
+
+    let config = ConfigBuilder::new().build();
+    assert_eq!(config.name, String::default());
+    assert_eq!(config.port, 42);
+    assert_eq!(config.numbers, vec![1, 2, 3]);
+}
+
+#[test]
+fn bare_default_with_custom_types() {
+    #[derive(PartialEq, Default, Debug)]
+    struct CustomType {
+        value: i32,
+    }
+
+    #[derive(Builder, PartialEq)]
+    struct Config {
+        #[builder(default)]
+        custom: CustomType,
+    }
+
+    let config = ConfigBuilder::new().build();
+    assert_eq!(config.custom, CustomType::default());
+}

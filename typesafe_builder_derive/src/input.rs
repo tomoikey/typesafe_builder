@@ -1,6 +1,28 @@
 use darling::{FromDeriveInput, FromField, util::Flag};
 use syn::{Expr, Generics, Ident, Type};
 
+#[derive(Debug, Clone)]
+pub enum DefaultValue {
+    Bare,
+    Expression(Expr),
+}
+
+impl darling::FromMeta for DefaultValue {
+    fn from_word() -> darling::Result<Self> {
+        Ok(DefaultValue::Bare)
+    }
+
+    fn from_value(value: &syn::Lit) -> darling::Result<Self> {
+        match value {
+            syn::Lit::Str(s) => {
+                let expr: Expr = syn::parse_str(&s.value())?;
+                Ok(DefaultValue::Expression(expr))
+            }
+            _ => Err(darling::Error::unexpected_lit_type(value)),
+        }
+    }
+}
+
 #[derive(Debug, FromDeriveInput)]
 #[darling(attributes(builder), supports(struct_named))]
 pub struct Input {
@@ -55,7 +77,7 @@ pub struct InputField {
 
     /// #[builder(default = "...")]
     #[darling(rename = "default", default)]
-    default: Option<Expr>,
+    default: Option<DefaultValue>,
 
     /// #[builder(into)]
     #[darling(rename = "into", default)]
@@ -107,7 +129,7 @@ impl InputField {
         }
     }
 
-    pub fn default(&self) -> Option<&Expr> {
+    pub fn default(&self) -> Option<&DefaultValue> {
         self.default.as_ref()
     }
 

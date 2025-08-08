@@ -52,7 +52,7 @@ let user = UserBuilder::new()
 ### Type-Level Constraint System
 - **Required Fields** - Completely prevent missing required field configuration
 - **Optional Fields** - Freely configurable fields
-- **Default Values** - Fields with intelligent default values using any Rust expression
+- **Default Values** - Fields with intelligent default values using `Default::default()` or custom expressions
 - **Conditional Requirements** - Express dynamic dependencies at the type level
 - **Complex Logic** - Support for AND/OR/NOT operators in complex conditional expressions
 - **Into Conversion** - Ergonomic setters with automatic type conversion via `Into<T>`
@@ -81,13 +81,15 @@ struct User {
     age: Option<u32>,
     #[builder(default = "String::from(\"user@example.com\")")]
     email: String,
+    #[builder(default)]
+    active: bool,
 }
 
 // Type-safe builder pattern
 let user = UserBuilder::new()
     .with_name("Alice".to_string())
     .with_age(30)
-    .build(); // email will be "user@example.com"
+    .build(); // email will be "user@example.com", active will be false
 ```
 
 ## Advanced Features
@@ -201,6 +203,52 @@ let client3 = ApiClientBuilder::new()
 
 ### 4. Default Values
 
+TypeSafe Builder supports two ways to specify default values:
+
+#### Simple Default Values (using `Default::default()`)
+
+```rust
+use typesafe_builder::*;
+
+#[derive(Builder)]
+struct Config {
+    // Uses String::default() (empty string)
+    #[builder(default)]
+    name: String,
+
+    // Uses i32::default() (0)
+    #[builder(default)]
+    port: i32,
+
+    // Uses bool::default() (false)
+    #[builder(default)]
+    enabled: bool,
+
+    // Uses Vec::default() (empty vector)
+    #[builder(default)]
+    items: Vec<String>,
+
+    // Uses HashMap::default() (empty map)
+    #[builder(default)]
+    metadata: std::collections::HashMap<String, String>,
+
+    // Works with custom types that implement Default
+    #[builder(default)]
+    custom_field: MyCustomType,
+
+    #[builder(required)]
+    service_name: String,
+}
+
+// ✅ Use default values
+let config = ConfigBuilder::new()
+    .with_service_name("my-service".to_string())
+    .build();
+// name: "", port: 0, enabled: false, items: [], metadata: {}, custom_field: MyCustomType::default()
+```
+
+#### Custom Default Expressions
+
 ```rust
 use typesafe_builder::*;
 
@@ -253,12 +301,42 @@ struct AppConfig {
 }
 ```
 
+#### Mixed Default Types
+
+```rust
+use typesafe_builder::*;
+
+#[derive(Builder)]
+struct MixedConfig {
+    // Simple default (uses Default::default())
+    #[builder(default)]
+    name: String,
+
+    // Custom expression default
+    #[builder(default = "42")]
+    port: i32,
+
+    // Simple default for collections
+    #[builder(default)]
+    tags: Vec<String>,
+
+    // Custom expression for complex initialization
+    #[builder(default = "std::collections::HashMap::from([(\"key\".to_string(), \"value\".to_string())])")]
+    metadata: std::collections::HashMap<String, String>,
+}
+
+let config = MixedConfigBuilder::new().build();
+// name: "", port: 42, tags: [], metadata: {"key": "value"}
+```
+
 Key features of default values:
-- Flexible expressions: Use any valid Rust expression as default value
-- No type restrictions: Works with primitives, collections, function calls, etc.
-- Environment variables: Access environment variables at build time
-- Function calls: Call any function or method as default value
-- Standalone attribute: Cannot be combined with `required`, `optional`, etc.
+- **Simple defaults**: Use `#[builder(default)]` for types implementing `Default`
+- **Custom expressions**: Use `#[builder(default = "expression")]` for any valid Rust expression
+- **No type restrictions**: Works with primitives, collections, function calls, etc.
+- **Environment variables**: Access environment variables at build time (custom expressions)
+- **Function calls**: Call any function or method as default value (custom expressions)
+- **Standalone attribute**: Cannot be combined with `required`, `optional`, etc.
+- **Zero runtime cost**: All defaults are computed at build time
 
 ### 5. Negation Operator Support
 
