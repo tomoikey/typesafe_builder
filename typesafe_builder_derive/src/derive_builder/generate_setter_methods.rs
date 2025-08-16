@@ -1,8 +1,11 @@
-use crate::{derive_builder::extract_arg_type, input::Requirement};
+use crate::{
+    derive_builder::extract_arg_type,
+    input::{DefaultValue, Requirement},
+};
 use quote::quote;
 use syn::{Generics, Ident, Type};
 
-type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>, bool);
+type FieldInfo = (Ident, Type, Requirement, Option<DefaultValue>, bool);
 
 pub fn generate_setter_methods<'a>(
     field_infos: &'a [FieldInfo],

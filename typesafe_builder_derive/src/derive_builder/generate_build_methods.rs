@@ -1,10 +1,10 @@
 use super::eval_condition;
-use crate::input::Requirement;
+use crate::input::{DefaultValue, Requirement};
 use quote::quote;
 use std::collections::HashMap;
 use syn::{Generics, Ident, Type};
 
-type FieldInfo = (Ident, Type, Requirement, Option<syn::Expr>, bool);
+type FieldInfo = (Ident, Type, Requirement, Option<DefaultValue>, bool);
 
 pub fn generate_build_methods(
     field_infos: &[FieldInfo],
@@ -39,8 +39,15 @@ pub fn generate_build_methods(
                     quote! { #ident : self.#ident.unwrap() }
                 }
                 Requirement::Default => {
-                    if let Some(default_expr) = default {
-                        quote! { #ident : self.#ident.unwrap_or_else(|| #default_expr) }
+                    if let Some(default_val) = default {
+                        match default_val {
+                            DefaultValue::Bare => {
+                                quote! { #ident : self.#ident.unwrap_or_else(|| Default::default()) }
+                            }
+                            DefaultValue::Expression(expr) => {
+                                quote! { #ident : self.#ident.unwrap_or_else(|| #expr) }
+                            }
+                        }
                     } else {
                         quote! { #ident : self.#ident.unwrap() }
                     }
